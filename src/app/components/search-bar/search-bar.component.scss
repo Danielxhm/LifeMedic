@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  padding: 10px 10px 14px;
+  background: #fff;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  border-radius: 20px;
+  padding: 0 12px;
+  color: #171923;
+  background: #ededed;
+}
+
+.search-bar__icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+
+.search-bar__input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #333;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+}
+
+.search-bar__input::placeholder {
+  color: #737373;
+  opacity: 1;
+}
+
+.search-bar__input::-webkit-search-cancel-button {
+  cursor: pointer;
+}

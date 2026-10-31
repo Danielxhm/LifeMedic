@@ -1,0 +1,15 @@
+<header class="home-topbar">
+  <span class="home-topbar__brand">LifeMedic</span>
+
+  <button
+    class="home-topbar__cart"
+    type="button"
+    [attr.aria-label]="'Carrito, ' + cartCount + ' productos'"
+  >
+    <ion-icon name="bag-outline" aria-hidden="true"></ion-icon>
+
+    @if (cartCount > 0) {
+      <span class="home-topbar__badge">{{ cartCount }}</span>
+    }
+  </button>
+</header>

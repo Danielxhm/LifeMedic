@@ -1,0 +1,36 @@
+<swiper-container
+  class="promo-swiper"
+  slides-per-view="auto"
+  space-between="12"
+  autoplay-delay="4000"
+  autoplay-disable-on-interaction="false"
+>
+  @for (promotion of promotions; track promotion.title) {
+    <swiper-slide>
+      <article
+        class="promotion"
+        [style.--card-color]="promotion.color"
+      >
+        <div class="promotion__content">
+          <p class="promotion__brand">{{ promotion.brand }}</p>
+
+          <h2>{{ promotion.title }}</h2>
+
+          <p class="promotion__description">
+            {{ promotion.description }}
+          </p>
+
+          <button class="promotion__button">
+            {{ promotion.action }}
+          </button>
+        </div>
+
+        <img
+          class="promotion__image"
+          [src]="promotion.image"
+          [alt]="promotion.title"
+        />
+      </article>
+    </swiper-slide>
+  }
+</swiper-container>

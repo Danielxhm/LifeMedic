@@ -1,0 +1,16 @@
+<div class="search-bar" role="search">
+  <ion-icon
+    class="search-bar__icon"
+    name="search-outline"
+    aria-hidden="true"
+  ></ion-icon>
+
+  <input
+    class="search-bar__input"
+    type="search"
+    placeholder="Acetaminofen"
+    aria-label="Buscar productos"
+    [value]="query"
+    (input)="onInput($event)"
+  />
+</div>

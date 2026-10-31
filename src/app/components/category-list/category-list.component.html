@@ -1,0 +1,27 @@
+<section class="categories">
+  <header class="categories__header">
+    <h2>Categorías</h2>
+
+    <button
+      class="categories__view-all"
+      type="button"
+      (click)="viewAll()"
+    >
+      Ver todo
+    </button>
+  </header>
+
+  <div class="categories__list" aria-label="Categorías de productos">
+    @for (category of categories; track category.id) {
+      <button
+        class="category-chip"
+        [class.category-chip--selected]="selectedCategoryId === category.id"
+        [attr.aria-pressed]="selectedCategoryId === category.id"
+        type="button"
+        (click)="selectCategory(category.id)"
+      >
+        {{ category.name }}
+      </button>
+    }
+  </div>
+</section>

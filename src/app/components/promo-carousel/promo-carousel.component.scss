@@ -1,0 +1,76 @@
+:host {
+  display: block;
+}
+
+.promo-swiper {
+  display: block;
+  width: 100%;
+  padding: 4px 0 12px 18px;
+}
+
+swiper-slide {
+  display: block;
+  width: 88%;
+  height: auto;
+}
+
+.promotion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 236px;
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 18px 14px;
+  color: #123b25;
+  background:
+    radial-gradient(ellipse at 78% 65%, #eff7d7 0%, transparent 42%),
+    linear-gradient(115deg, #d8f3c3 0%, #a8c978 48%, #789953 100%);
+}
+
+.promotion__content {
+  position: relative;
+  z-index: 1;
+  width: 59%;
+}
+
+.promotion__brand {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.promotion h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  line-height: 1.15;
+  font-weight: 750;
+}
+
+.promotion__description {
+  margin: 0 0 12px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.promotion__button {
+  border: 0;
+  border-radius: 20px;
+  padding: 7px 12px;
+  color: #173d22;
+  background: #b8f276;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.promotion__image {
+  position: absolute;
+  right: -4px;
+  bottom: 0;
+  width: 60%;
+  height: 88%;
+  object-fit: contain;
+  object-position: right bottom;
+}

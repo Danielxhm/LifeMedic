@@ -1,0 +1,149 @@
+:host {
+  display: block;
+}
+
+.new-arrivals {
+  padding: 4px 18px 24px;
+  color: #171923;
+}
+
+.new-arrivals__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.new-arrivals__header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.new-arrivals__view-all {
+  border: 0;
+  padding: 4px 0 4px 8px;
+  color: #8c96a8;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.product-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgb(31 41 55 / 6%);
+}
+
+.product-card__image-area {
+  position: relative;
+  display: grid;
+  height: 142px;
+  place-items: center;
+  overflow: hidden;
+  background: #fff;
+}
+
+.product-card__image-area img {
+  width: 78%;
+  height: 82%;
+  object-fit: contain;
+}
+
+.product-card__badge {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 9px;
+  border-radius: 10px;
+  padding: 4px 7px;
+  color: #fff;
+  background: #171923;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.product-card__favorite {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  right: 8px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  color: #171923;
+  background: transparent;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.product-card__details {
+  padding: 0 10px 10px;
+}
+
+.product-card__brand {
+  overflow: hidden;
+  margin: 0 0 2px;
+  color: #8c96a8;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card__details h3 {
+  display: -webkit-box;
+  min-height: 30px;
+  overflow: hidden;
+  margin: 0 0 8px;
+  color: #171923;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.product-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.product-card__price {
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 5px 8px;
+  color: #171923;
+  background: #f1f2f4;
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-card__add {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  color: white;
+  background: #080808;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+}

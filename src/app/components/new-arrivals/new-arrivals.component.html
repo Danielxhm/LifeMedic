@@ -1,0 +1,56 @@
+<section class="new-arrivals">
+  <header class="new-arrivals__header">
+    <h2>Novedades</h2>
+
+    <button
+      class="new-arrivals__view-all"
+      type="button"
+      (click)="viewAll()"
+    >
+      Ver todo
+    </button>
+  </header>
+
+  <div class="product-list">
+    @for (product of newestProducts; track product.id) {
+      <article class="product-card">
+        <div class="product-card__image-area">
+          @if (product.badge) {
+            <span class="product-card__badge">{{ product.badge }}</span>
+          }
+
+          <button
+            class="product-card__favorite"
+            type="button"
+            [attr.aria-label]="'Agregar ' + product.name + ' a favoritos'"
+            (click)="toggleFavorite(product)"
+          >
+            ♡
+          </button>
+
+          <img [src]="product.image" [alt]="product.name" />
+        </div>
+
+        <div class="product-card__details">
+          <p class="product-card__brand">{{ product.brand }}</p>
+          <h3>{{ product.name }}</h3>
+
+          <div class="product-card__bottom">
+            <span class="product-card__price">
+              ${{ product.price.toFixed(2) }} {{ product.currency }}
+            </span>
+
+            <button
+              class="product-card__add"
+              type="button"
+              [attr.aria-label]="'Agregar ' + product.name + ' al carrito'"
+              (click)="addToCart(product)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>
