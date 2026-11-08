@@ -1,61 +1,56 @@
-import { Component } from '@angular/core';
-
-interface Product {
-  id: number;
-  brand: string;
-  name: string;
-  price: number;
-  currency: string;
-  image: string;
-  createdAt: string;
-  badge?: string;
-}
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  ProductCardComponent,
+  Product,
+} from '../product-card/product-card.component';
 
 @Component({
   selector: 'app-new-arrivals',
   standalone: true,
+  imports: [ProductCardComponent],
   templateUrl: './new-arrivals.component.html',
   styleUrls: ['./new-arrivals.component.scss'],
 })
 export class NewArrivalsComponent {
-  private readonly products: Product[] = [
+  private readonly router = inject(Router);
+
+  readonly newestProducts: Product[] = [
     {
       id: 1,
-      brand: 'Murad',
+      brand: 'MURAD',
       name: 'Crema de Noche con Retinol',
-      price: 25,
+      price: 25.0,
       currency: 'USD',
       image: 'assets/images/retinol.png',
-      createdAt: '2026-10-28',
       badge: 'NUEVO',
+      badgeType: 'dark',
+      createdAt: '2026-10-28',
+      isFavorite: false,
     },
     {
       id: 2,
-      brand: 'Protección diaria',
-      name: 'Protector solar',
+      brand: 'PROTECCIÓN DIARIA',
+      name: 'Protector solar FPS 50+',
       price: 14.5,
       currency: 'USD',
       image: 'assets/images/protector-solar.png',
+      badge: 'OFERTA',
+      badgeType: 'green',
       createdAt: '2026-10-25',
+      isFavorite: false,
     },
   ];
 
-  readonly newestProducts = [...this.products]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-    .slice(0, 10);
-
   toggleFavorite(product: Product): void {
-    console.log('Cambiar favorito:', product.name);
+    product.isFavorite = !product.isFavorite;
   }
 
   addToCart(product: Product): void {
-    console.log('Agregar al carrito:', product.name);
+    console.log('Producto añadido al carrito:', product.name);
   }
 
   viewAll(): void {
-    console.log('Ver todos los productos nuevos');
+    this.router.navigate(['/products']);
   }
 }

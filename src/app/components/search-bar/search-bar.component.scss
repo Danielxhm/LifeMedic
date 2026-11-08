@@ -1,23 +1,24 @@
 :host {
   display: block;
-  padding: 10px 10px 14px;
+  padding: 8px 16px 12px;
   background: #fff;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 36px;
-  border-radius: 20px;
-  padding: 0 12px;
+  gap: 10px;
+  min-height: 42px;
+  border-radius: 9999px;
+  padding: 0 14px;
   color: #171923;
-  background: #ededed;
+  background: #f3f5f8;
 }
 
 .search-bar__icon {
   flex: 0 0 auto;
-  font-size: 16px;
+  font-size: 18px;
+  color: #8c96a8;
 }
 
 .search-bar__input {
@@ -25,14 +26,15 @@
   min-width: 0;
   border: 0;
   outline: 0;
-  color: #333;
+  color: #171923;
   background: transparent;
-  font: inherit;
-  font-size: 11px;
+  font-family: var(--font-body, 'Geist', sans-serif);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .search-bar__input::placeholder {
-  color: #737373;
+  color: #94a3b8;
   opacity: 1;
 }
 

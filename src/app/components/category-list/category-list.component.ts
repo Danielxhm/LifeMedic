@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 interface Category {
   id: number;
@@ -12,6 +13,8 @@ interface Category {
   styleUrls: ['./category-list.component.scss'],
 })
 export class CategoryListComponent {
+  private readonly router = inject(Router);
+
   categories: Category[] = [
     { id: 1, name: 'Fragancias' },
     { id: 2, name: 'Maquillaje' },
@@ -29,5 +32,6 @@ export class CategoryListComponent {
 
   viewAll(): void {
     this.selectedCategoryId = null;
+    this.router.navigate(['/products']);
   }
 }

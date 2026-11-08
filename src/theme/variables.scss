@@ -1,4 +1,10 @@
 :root {
-  --ion-background-color: #f7f5ef;
-  --ion-background-color-rgb: 247, 245, 239;
+  --ion-font-family: 'Geist', 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Google Sans', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Geist', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: #171923;
+  --ion-text-color-rgb: 23, 25, 35;
 }

@@ -1,0 +1,165 @@
+<ion-content [fullscreen]="true">
+  <app-home-topbar [cartCount]="cartCount"></app-home-topbar>
+
+  <div class="catalog-page">
+    <!-- Header Section -->
+    <header class="catalog-heading">
+      <span class="catalog-heading__eyebrow">EXPLORA EL CATÁLOGO COMPLETO</span>
+      <div class="catalog-heading__row">
+        <h1 class="catalog-heading__title">Todos los Productos</h1>
+        <span class="catalog-heading__badge">{{ totalProductsCount }} productos</span>
+      </div>
+    </header>
+
+    <!-- Search with Divider and Hugeicons Filter Button -->
+    <div class="catalog-search" role="search">
+      <hugeicons-icon
+        class="catalog-search__icon"
+        [icon]="Search01Icon"
+        [size]="18"
+        [strokeWidth]="1.8"
+        color="currentColor"
+        aria-hidden="true"
+      ></hugeicons-icon>
+
+      <input
+        class="catalog-search__input"
+        type="search"
+        placeholder="Buscar medicamentos"
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+        aria-label="Buscar medicamentos"
+      />
+
+      @if (searchQuery) {
+        <button
+          class="catalog-search__clear-btn"
+          type="button"
+          (click)="clearSearch()"
+          aria-label="Limpiar búsqueda"
+        >
+          <hugeicons-icon
+            [icon]="Cancel01Icon"
+            [size]="16"
+            [strokeWidth]="1.8"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      }
+
+      <div class="catalog-search__divider" aria-hidden="true"></div>
+
+      <button
+        class="catalog-search__filter-btn"
+        type="button"
+        (click)="toggleSortModal()"
+        aria-label="Opciones de ordenamiento y filtros"
+      >
+        <hugeicons-icon
+          [icon]="SlidersHorizontalIcon"
+          [size]="18"
+          [strokeWidth]="1.8"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </div>
+
+    <!-- Category Chips (Horizontal Scrollable) -->
+    <div class="catalog-chips-container" role="tablist" aria-label="Categorías">
+      @for (cat of categories; track cat.id) {
+        <button
+          class="catalog-chip"
+          [class.catalog-chip--active]="selectedCategoryId === cat.id"
+          [attr.aria-selected]="selectedCategoryId === cat.id"
+          role="tab"
+          type="button"
+          (click)="selectCategory(cat.id)"
+        >
+          {{ cat.name }}
+        </button>
+      }
+    </div>
+
+    <!-- Controls Row: Count and Sort Dropdown -->
+    <div class="catalog-controls">
+      <span class="catalog-controls__count">
+        Mostrando {{ filteredProducts.length }} productos
+      </span>
+
+      <div class="catalog-sort">
+        <button
+          class="catalog-sort__btn"
+          type="button"
+          (click)="toggleSortModal()"
+          aria-haspopup="listbox"
+          [attr.aria-expanded]="isSortModalOpen"
+        >
+          <span>{{ selectedSortLabel }}</span>
+          <hugeicons-icon
+            [icon]="ChevronDownIcon"
+            [size]="14"
+            [strokeWidth]="1.8"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+
+        @if (isSortModalOpen) {
+          <div class="catalog-sort__backdrop" (click)="toggleSortModal()"></div>
+          <div class="catalog-sort__dropdown" role="listbox">
+            @for (opt of sortOptions; track opt.id) {
+              <button
+                class="catalog-sort__option"
+                [class.catalog-sort__option--selected]="selectedSort === opt.id"
+                role="option"
+                [attr.aria-selected]="selectedSort === opt.id"
+                type="button"
+                (click)="selectSort(opt.id)"
+              >
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Products Grid (Using unified ProductCardComponent) -->
+    @if (filteredProducts.length > 0) {
+      <div class="products-grid">
+        @for (product of filteredProducts; track product.id) {
+          <app-product-card
+            [product]="product"
+            (favoriteToggled)="toggleFavorite($event)"
+            (addedToCart)="addToCart($event)"
+          ></app-product-card>
+        }
+      </div>
+    } @else {
+      <!-- Empty state when search or category filter yields no results -->
+      <div class="catalog-empty">
+        <hugeicons-icon
+          class="catalog-empty__icon"
+          [icon]="Search01Icon"
+          [size]="42"
+          [strokeWidth]="1.5"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+        <h3 class="catalog-empty__title">No se encontraron medicamentos</h3>
+        <p class="catalog-empty__text">
+          No hay productos que coincidan con "{{ searchQuery }}". Intenta con otro término o limpia los filtros.
+        </p>
+        <button
+          class="catalog-empty__reset"
+          type="button"
+          (click)="clearSearch(); selectCategory('all')"
+        >
+          Ver todos los medicamentos
+        </button>
+      </div>
+    }
+  </div>
+</ion-content>

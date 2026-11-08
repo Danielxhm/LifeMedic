@@ -7,7 +7,7 @@
   display: block;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #fff;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid #f0f0f0;
 }
 
 .bottom-nav {
@@ -23,19 +23,20 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
-  color: #8d8d8d;
+  color: #94a3b8;
   text-decoration: none;
-  font-size: 9px;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
 }
 
 .bottom-nav__item ion-icon {
-  font-size: 18px;
+  font-size: 19px;
 }
 
 .bottom-nav__item--active {
   color: #4e812e;
-}
-
-.bottom-nav__item--active span {
   font-weight: 600;
 }

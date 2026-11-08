@@ -1,0 +1,69 @@
+<article class="product-card">
+  <!-- Top: Badge and Favorite Button -->
+  <div class="product-card__top">
+    @if (product.badge) {
+      <span
+        class="product-card__badge"
+        [class.product-card__badge--green]="product.badgeType === 'green'"
+        [class.product-card__badge--dark]="product.badgeType === 'dark'"
+      >
+        {{ product.badge }}
+      </span>
+    } @else {
+      <span class="product-card__spacer"></span>
+    }
+
+    <button
+      class="product-card__favorite"
+      type="button"
+      [class.product-card__favorite--active]="product.isFavorite"
+      [attr.aria-label]="product.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+      (click)="onToggleFavorite($event)"
+    >
+      <hugeicons-icon
+        [icon]="FavouriteIcon"
+        [size]="19"
+        [strokeWidth]="1.8"
+        color="currentColor"
+        aria-hidden="true"
+      ></hugeicons-icon>
+    </button>
+  </div>
+
+  <!-- Product Image -->
+  <div class="product-card__image-wrap">
+    <img
+      [src]="product.image"
+      [alt]="product.name"
+      loading="lazy"
+    />
+  </div>
+
+  <!-- Product Info -->
+  <div class="product-card__info">
+    <span class="product-card__brand">{{ product.brand }}</span>
+    <h3 class="product-card__name">{{ product.name }}</h3>
+
+    <div class="product-card__footer">
+      <div class="product-card__price-group">
+        <span class="product-card__price">${{ product.price.toFixed(2) }}</span>
+        <span class="product-card__currency">{{ product.currency }}</span>
+      </div>
+
+      <button
+        class="product-card__add"
+        type="button"
+        [attr.aria-label]="'Añadir ' + product.name + ' al carrito'"
+        (click)="onAddToCart($event)"
+      >
+        <hugeicons-icon
+          [icon]="Add01Icon"
+          [size]="18"
+          [strokeWidth]="2.2"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </div>
+  </div>
+</article>
