@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ToastController } from '@ionic/angular/lazy';
 import {
   Search01Icon,
@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
 } from '@hugeicons/core-free-icons';
 import { Product } from '../../components/product-card/product-card.component';
+import { ProductsService } from '../../services/products.service';
 
 export interface CategoryTab {
   id: string;
@@ -19,8 +20,9 @@ export interface CategoryTab {
   styleUrls: ['./products.page.scss'],
   standalone: false,
 })
-export class ProductsPage {
+export class ProductsPage implements OnInit {
   private readonly toastCtrl = inject(ToastController);
+  private readonly productsService = inject(ProductsService);
 
   readonly Search01Icon = Search01Icon;
   readonly Cancel01Icon = Cancel01Icon;
@@ -49,112 +51,20 @@ export class ProductsPage {
     { id: 'nombre-asc', label: 'Nombre A-Z' },
   ];
 
-  products: Product[] = [
-    {
-      id: 1,
-      brand: 'ADVIL',
-      name: 'Osteo-Bi Flex Complex',
-      price: 7.5,
-      currency: 'USD',
-      image: 'assets/images/osteo-biflex.jpg',
-      badge: 'OFERTA',
-      badgeType: 'green',
-      category: 'Dolor y fiebre',
-      categoryId: 'dolor',
-      isFavorite: false,
-    },
-    {
-      id: 2,
-      brand: 'TYLENOL',
-      name: 'Tylenol PM Extra Strength',
-      price: 6.5,
-      currency: 'USD',
-      image: 'assets/images/tylenol-pm.jpg',
-      badge: 'MÁS VENDIDO',
-      badgeType: 'dark',
-      category: 'Dolor y fiebre',
-      categoryId: 'dolor',
-      isFavorite: false,
-    },
-    {
-      id: 3,
-      brand: 'PEPTO-BISMOL',
-      name: 'Pepto-Bismol',
-      price: 5.25,
-      currency: 'USD',
-      image: 'assets/images/pepto-bismol.jpg',
-      badge: 'ESENCIAL',
-      badgeType: 'dark',
-      category: 'Estómago',
-      categoryId: 'estomago',
-      isFavorite: false,
-    },
-    {
-      id: 4,
-      brand: 'BAND-AID',
-      name: 'Apósitos Band-Aid',
-      price: 4.0,
-      currency: 'USD',
-      image: 'assets/images/band-aid.jpg',
-      badge: 'IMPERMEABLE',
-      badgeType: 'green',
-      category: 'Primeros auxilios',
-      categoryId: 'primeros-auxilios',
-      isFavorite: false,
-    },
-    {
-      id: 5,
-      brand: 'MURAD',
-      name: 'Crema de Noche con Retinol',
-      price: 25.0,
-      currency: 'USD',
-      image: 'assets/images/retinol.png',
-      badge: 'OFERTA',
-      badgeType: 'green',
-      category: 'Cuidado de la piel',
-      categoryId: 'cuidado',
-      isFavorite: false,
-    },
-    {
-      id: 6,
-      brand: 'PROTECCIÓN DIARIA',
-      name: 'Protector Solar FPS 50+',
-      price: 14.5,
-      currency: 'USD',
-      image: 'assets/images/protector-solar.png',
-      badge: 'PROTECCIÓN',
-      badgeType: 'green',
-      category: 'Cuidado de la piel',
-      categoryId: 'cuidado',
-      isFavorite: false,
-    },
-    {
-      id: 7,
-      brand: 'BAYER',
-      name: 'Aspirina 500mg',
-      price: 3.75,
-      currency: 'USD',
-      image: 'assets/images/aspirina.jpg',
-      badge: 'MÁS VENDIDO',
-      badgeType: 'dark',
-      category: 'Dolor y fiebre',
-      categoryId: 'dolor',
-      isFavorite: false,
-    },
-    {
-      id: 8,
-      brand: 'ALKA-SELTZER',
-      name: 'Alka-Seltzer Efervescente',
-      price: 4.5,
-      currency: 'USD',
-      image: 'assets/images/alka-seltzer.jpg',
-      badge: 'ALIVIO RÁPIDO',
-      badgeType: 'green',
-      category: 'Estómago',
-      categoryId: 'estomago',
-      isFavorite: false,
-    },
-  ];
+  products: Product[] = [];
+
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+
+  ionViewWillEnter(): void {
+    this.loadProducts();
+  }
+
+  private loadProducts(): void {
+    this.products = this.productsService.getProducts();
+    this.cartCount = this.productsService.getCartCount();
+  }
 
   get totalProductsCount(): number {
     return this.products.length;
@@ -229,6 +139,7 @@ export class ProductsPage {
   }
 
   async toggleFavorite(product: Product): Promise<void> {
+    this.productsService.toggleFavorite(product.id);
     product.isFavorite = !product.isFavorite;
     const message = product.isFavorite
       ? `Añadido a favoritos: ${product.name}`
@@ -244,7 +155,7 @@ export class ProductsPage {
   }
 
   async addToCart(product: Product): Promise<void> {
-    this.cartCount += 1;
+    this.cartCount = this.productsService.addToCart(product.id);
     const toast = await this.toastCtrl.create({
       message: `¡${product.name} añadido al carrito!`,
       duration: 1800,

@@ -1,0 +1,213 @@
+<ion-header class="ion-no-border detail-header">
+  <ion-toolbar class="detail-toolbar">
+    <button
+      class="nav-btn nav-btn--back"
+      type="button"
+      aria-label="Volver atrás"
+      (click)="goBack()"
+    >
+      <hugeicons-icon
+        [icon]="ArrowLeft02Icon"
+        [size]="22"
+        [strokeWidth]="2"
+        color="currentColor"
+        aria-hidden="true"
+      ></hugeicons-icon>
+    </button>
+
+    <ion-title class="detail-toolbar__title"></ion-title>
+
+    <div slot="end" class="detail-toolbar__actions">
+      <button
+        class="nav-btn nav-btn--cart"
+        type="button"
+        [attr.aria-label]="'Carrito, ' + cartCount + ' productos'"
+        (click)="goToCart()"
+      >
+        <hugeicons-icon
+          [icon]="ShoppingBag01Icon"
+          [size]="20"
+          [strokeWidth]="1.7"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+
+        @if (cartCount > 0) {
+          <span class="cart-badge">{{ cartCount }}</span>
+        }
+      </button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="detail-content">
+  @if (product) {
+    <div class="product-detail">
+      <!-- Image Gallery Section -->
+      <section class="gallery-section" aria-label="Galería de imágenes">
+        <div class="gallery-container">
+          <img
+            class="gallery-image"
+            [src]="activeImage"
+            [alt]="product.name"
+            loading="eager"
+          />
+        </div>
+
+        <!-- Carousel Pagination Dots -->
+        @if (galleryImages.length > 1) {
+          <div class="gallery-dots" role="tablist" aria-label="Selector de imagen">
+            @for (img of galleryImages; track $index; let i = $index) {
+              <button
+                class="gallery-dot"
+                type="button"
+                [class.gallery-dot--active]="activeImageIndex === i"
+                [attr.aria-label]="'Ver imagen ' + (i + 1)"
+                (click)="selectImage(i)"
+              ></button>
+            }
+          </div>
+        } @else {
+          <!-- Display visual 3-dot mockup for single image to match design -->
+          <div class="gallery-dots" aria-hidden="true">
+            <span class="gallery-dot gallery-dot--active"></span>
+            <span class="gallery-dot"></span>
+            <span class="gallery-dot"></span>
+          </div>
+        }
+      </section>
+
+      <!-- Main Product Information -->
+      <section class="info-section">
+        <!-- Laboratory label -->
+        <p class="laboratory-label">
+          LABORATORIO: <span>{{ product.laboratory || product.brand }}</span>
+        </p>
+
+        <!-- Product Name -->
+        <h1 class="product-title">{{ product.name }}</h1>
+
+        <!-- Rating & Reviews -->
+        <div class="rating-row">
+          <hugeicons-icon
+            class="star-icon"
+            [icon]="StarIcon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#16a34a"
+            aria-hidden="true"
+          ></hugeicons-icon>
+          <span class="rating-value">{{ product.rating || 4.8 }}</span>
+          <span class="reviews-count">({{ product.reviewsCount || 217 }} Reviews)</span>
+        </div>
+
+        <!-- Price, Original Price and Discount -->
+        <div class="price-row">
+          <span class="current-price">
+            ${{ product.price.toFixed(2) }} {{ product.currency }}
+          </span>
+
+          @if (product.originalPrice && product.originalPrice > product.price) {
+            <span class="original-price">
+              ${{ product.originalPrice.toFixed(2) }} {{ product.currency }}
+            </span>
+          }
+
+          @if (product.discountPercent) {
+            <span class="discount-pill">-{{ product.discountPercent }}%</span>
+          }
+        </div>
+
+        <!-- Size / Presentation Selector -->
+        @if (product.sizes && product.sizes.length > 0) {
+          <div class="sizes-section" aria-label="Selecciona presentación">
+            @for (size of product.sizes; track size) {
+              <button
+                class="size-chip"
+                type="button"
+                [class.size-chip--active]="selectedSize === size"
+                (click)="selectSize(size)"
+              >
+                {{ size }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Delivery & Availability Badges -->
+        <ul class="features-list">
+          <li class="feature-item feature-item--available">
+            <hugeicons-icon
+              class="feature-icon feature-icon--green"
+              [icon]="PackageIcon"
+              [size]="19"
+              [strokeWidth]="1.8"
+              color="#16a34a"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="feature-text feature-text--green">Disponible</span>
+          </li>
+
+          <li class="feature-item">
+            <hugeicons-icon
+              class="feature-icon"
+              [icon]="DeliveryTruck01Icon"
+              [size]="19"
+              [strokeWidth]="1.8"
+              color="#64748b"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="feature-text">Envio Gratis</span>
+          </li>
+
+          <li class="feature-item">
+            <hugeicons-icon
+              class="feature-icon"
+              [icon]="Store01Icon"
+              [size]="19"
+              [strokeWidth]="1.8"
+              color="#64748b"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="feature-text">Disponible en tienda</span>
+          </li>
+        </ul>
+
+        <!-- Description -->
+        @if (product.description) {
+          <div class="description-section">
+            <p class="description-text">{{ product.description }}</p>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</ion-content>
+
+<!-- Bottom Sticky Action Bar above the persistent bottom navigation -->
+<footer class="detail-action-bar">
+  <button
+    class="action-fav-btn"
+    type="button"
+    [class.action-fav-btn--active]="product?.isFavorite"
+    [attr.aria-label]="product?.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'"
+    (click)="toggleFavorite()"
+  >
+    <hugeicons-icon
+      [icon]="FavouriteIcon"
+      [size]="21"
+      [strokeWidth]="1.8"
+      color="currentColor"
+      aria-hidden="true"
+    ></hugeicons-icon>
+  </button>
+
+  <button
+    class="action-cart-btn"
+    type="button"
+    aria-label="Añadir producto al carrito"
+    (click)="addToCart()"
+  >
+    Añadir al carrito
+  </button>
+</footer>
