@@ -30,6 +30,7 @@ export interface Product {
   sizes?: string[];
   description?: string;
   inStock?: boolean;
+  stock?: number;
   freeShipping?: boolean;
   inStoreAvailable?: boolean;
   isFavorite?: boolean;

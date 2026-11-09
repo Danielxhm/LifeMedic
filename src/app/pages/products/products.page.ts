@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/lazy';
 import {
   Search01Icon,
@@ -21,6 +22,7 @@ export interface CategoryTab {
   standalone: false,
 })
 export class ProductsPage implements OnInit {
+  private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly productsService = inject(ProductsService);
 
@@ -158,13 +160,15 @@ export class ProductsPage implements OnInit {
     this.cartCount = this.productsService.addToCart(product.id);
     const toast = await this.toastCtrl.create({
       message: `¡${product.name} añadido al carrito!`,
-      duration: 1800,
+      duration: 2000,
       position: 'bottom',
       color: 'dark',
       buttons: [
         {
           text: 'Ver',
-          role: 'cancel',
+          handler: () => {
+            this.router.navigate(['/cart']);
+          },
         },
       ],
     });

@@ -5,6 +5,7 @@
     class="home-topbar__cart"
     type="button"
     [attr.aria-label]="'Carrito, ' + cartCount + ' productos'"
+    (click)="goToCart()"
   >
     <hugeicons-icon
       [icon]="ShoppingBag01Icon"

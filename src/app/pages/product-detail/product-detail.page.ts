@@ -98,7 +98,7 @@ export class ProductDetailPage implements OnInit {
   }
 
   goToCart(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/cart']);
   }
 
   async toggleFavorite(): Promise<void> {
@@ -121,17 +121,23 @@ export class ProductDetailPage implements OnInit {
 
   async addToCart(): Promise<void> {
     if (!this.product) return;
-    this.cartCount = this.productsService.addToCart(this.product.id);
+    this.cartCount = this.productsService.addToCart(
+      this.product.id,
+      1,
+      this.selectedSize,
+    );
 
     const toast = await this.toastCtrl.create({
       message: `¡${this.product.name} añadido al carrito!`,
-      duration: 1800,
+      duration: 2000,
       position: 'bottom',
       color: 'dark',
       buttons: [
         {
           text: 'Ver',
-          role: 'cancel',
+          handler: () => {
+            this.router.navigate(['/cart']);
+          },
         },
       ],
     });

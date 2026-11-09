@@ -1,13 +1,15 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Product } from '../components/product-card/product-card.component';
+import { CartService } from './cart.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductsService {
-  private readonly cartCountSubject = new BehaviorSubject<number>(4);
-  readonly cartCount$: Observable<number> = this.cartCountSubject.asObservable();
+  private readonly cartService = inject(CartService);
+
+  readonly cartCount$: Observable<number> = this.cartService.cartCount$;
 
   private readonly products: Product[] = [
     {
@@ -34,6 +36,7 @@ export class ProductsService {
       description:
         'Coadyudante en el mantenimiento de la función normal de las articulaciones..',
       inStock: true,
+      stock: 8,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -62,6 +65,7 @@ export class ProductsService {
       description:
         'Alivio eficaz del dolor leve nocturno acompañado de insomnio para un descanso profundo y reparador.',
       inStock: true,
+      stock: 15,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -87,6 +91,7 @@ export class ProductsService {
       description:
         'Alivio rápido de 5 síntomas estomacales: acidez, indigestión, malestar estomacal, náuseas y diarrea.',
       inStock: true,
+      stock: 10,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -112,6 +117,7 @@ export class ProductsService {
       description:
         'Curitas adhesivas estériles e impermeables que sellan contra el agua, suciedad y bacterias.',
       inStock: true,
+      stock: 20,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -137,6 +143,7 @@ export class ProductsService {
       description:
         'Tratamiento intensivo regenerador antiedad que minimiza visiblemente arrugas y mejora el tono de la piel.',
       inStock: true,
+      stock: 6,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -162,6 +169,7 @@ export class ProductsService {
       description:
         'Protección solar avanzada de amplio espectro UVA/UVB con cintas de seda hidratante por 12 horas.',
       inStock: true,
+      stock: 12,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -187,6 +195,7 @@ export class ProductsService {
       description:
         'Alivio analgésico y antipirético de rápida acción contra dolor de cabeza, dolor muscular y fiebre.',
       inStock: true,
+      stock: 18,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -212,6 +221,7 @@ export class ProductsService {
       description:
         'Fórmula efervescente de rápida absorción que combate pesadez, indigestión ácida y fatiga.',
       inStock: true,
+      stock: 14,
       freeShipping: true,
       inStoreAvailable: true,
       isFavorite: false,
@@ -235,14 +245,15 @@ export class ProductsService {
     return false;
   }
 
-  addToCart(productId: number, quantity: number = 1): number {
-    const current = this.cartCountSubject.getValue();
-    const updated = current + quantity;
-    this.cartCountSubject.next(updated);
-    return updated;
+  addToCart(productId: number, quantity: number = 1, size?: string): number {
+    const product = this.getProductById(productId);
+    if (product) {
+      this.cartService.addItem(product, quantity, size);
+    }
+    return this.cartService.getCartCount();
   }
 
   getCartCount(): number {
-    return this.cartCountSubject.getValue();
+    return this.cartService.getCartCount();
   }
 }

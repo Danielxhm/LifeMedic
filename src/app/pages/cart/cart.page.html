@@ -1,0 +1,304 @@
+<ion-header class="ion-no-border cart-header">
+  <ion-toolbar class="cart-toolbar">
+    <button
+      class="nav-btn nav-btn--back"
+      type="button"
+      aria-label="Volver atrás"
+      (click)="goBack()"
+    >
+      <hugeicons-icon
+        [icon]="ArrowLeft02Icon"
+        [size]="22"
+        [strokeWidth]="2"
+        color="currentColor"
+        aria-hidden="true"
+      ></hugeicons-icon>
+    </button>
+
+    <ion-title class="cart-toolbar__title">Mi carrito</ion-title>
+
+    <div slot="end" class="cart-toolbar__actions">
+      @if (items.length > 0) {
+        <button
+          class="nav-btn nav-btn--clear"
+          type="button"
+          aria-label="Vaciar carrito"
+          title="Vaciar carrito"
+          (click)="clearAll()"
+        >
+          <hugeicons-icon
+            [icon]="Delete02Icon"
+            [size]="19"
+            [strokeWidth]="1.8"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      }
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="cart-content">
+  <div class="cart-wrapper">
+    @if (items.length > 0 || isOrderModalOpen()) {
+      <!-- Cart Items List matching Figma mockup -->
+      <section class="cart-list" aria-label="Lista de productos en el carrito">
+        @for (item of (items.length > 0 ? items : previousItems); track item.product.id + '-' + (item.selectedSize || '')) {
+          <article class="cart-item">
+            <!-- Product Thumbnail -->
+            <div class="cart-item__thumbnail-box">
+              <img
+                class="cart-item__thumbnail"
+                [src]="item.product.image"
+                [alt]="item.product.name"
+                loading="lazy"
+              />
+            </div>
+
+            <!-- Product Details -->
+            <div class="cart-item__info">
+              <div class="cart-item__header-row">
+                <h2 class="cart-item__name">{{ item.product.name }}</h2>
+                <button
+                  type="button"
+                  class="cart-item__delete-btn"
+                  [attr.aria-label]="'Eliminar ' + item.product.name"
+                  (click)="confirmRemoveItem(item)"
+                >
+                  <hugeicons-icon
+                    [icon]="Cancel01Icon"
+                    [size]="15"
+                    [strokeWidth]="2"
+                    color="#94a3b8"
+                    aria-hidden="true"
+                  ></hugeicons-icon>
+                </button>
+              </div>
+
+              <!-- Presentation / Size subtitle -->
+              <p class="cart-item__variant">
+                {{ item.selectedSize || (item.product.sizes ? item.product.sizes[0] : 'Unidad') }}
+              </p>
+
+              <!-- Price & Stepper Row -->
+              <div class="cart-item__bottom-row">
+                <div class="cart-item__price-block">
+                  @if (item.product.originalPrice) {
+                    <span class="cart-item__original-price">
+                      {{ formatPrice(item.product.originalPrice) }}
+                    </span>
+                  }
+                  <span class="cart-item__current-price">
+                    {{ formatPrice(item.product.price) }} USD
+                  </span>
+                </div>
+
+                <!-- Stepper Pill Controls -->
+                <div class="stepper" role="group" [attr.aria-label]="'Cantidad para ' + item.product.name">
+                  <button
+                    type="button"
+                    class="stepper__btn stepper__btn--minus"
+                    aria-label="Disminuir cantidad"
+                    (click)="onDecrement(item)"
+                  >
+                    <hugeicons-icon
+                      [icon]="Remove01Icon"
+                      [size]="13"
+                      [strokeWidth]="2.4"
+                      color="currentColor"
+                      aria-hidden="true"
+                    ></hugeicons-icon>
+                  </button>
+
+                  <span class="stepper__quantity" aria-live="polite">
+                    {{ item.quantity }}
+                  </span>
+
+                  <button
+                    type="button"
+                    class="stepper__btn stepper__btn--plus"
+                    [disabled]="item.quantity >= (item.product.stock || 10)"
+                    [attr.aria-label]="'Aumentar cantidad. Stock máximo: ' + (item.product.stock || 10)"
+                    (click)="onIncrement(item)"
+                  >
+                    <hugeicons-icon
+                      [icon]="Add01Icon"
+                      [size]="13"
+                      [strokeWidth]="2.4"
+                      color="currentColor"
+                      aria-hidden="true"
+                    ></hugeicons-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Stock warning pill if stock limit reached -->
+              @if (item.quantity >= (item.product.stock || 10)) {
+                <div class="stock-badge" role="status">
+                  <hugeicons-icon
+                    [icon]="AlertCircleIcon"
+                    [size]="13"
+                    [strokeWidth]="2"
+                    color="#d97706"
+                    aria-hidden="true"
+                  ></hugeicons-icon>
+                  <span>Stock máximo disponible alcanzado</span>
+                </div>
+              }
+            </div>
+          </article>
+        }
+      </section>
+
+      <!-- Subtotals, Taxes & Order Summary Breakdown -->
+      <section class="order-summary" aria-label="Resumen de la orden">
+        <h3 class="order-summary__heading">Detalle de costos</h3>
+
+        <div class="order-summary__row">
+          <span class="order-summary__label">Subtotal</span>
+          <span class="order-summary__value">
+            {{ formatPrice((items.length > 0 ? summary : previousSummary).subtotal) }} USD
+          </span>
+        </div>
+
+        <div class="order-summary__row">
+          <span class="order-summary__label">
+            Impuestos aplicables (10.4%)
+          </span>
+          <span class="order-summary__value">
+            {{ formatPrice((items.length > 0 ? summary : previousSummary).tax) }} USD
+          </span>
+        </div>
+
+        <div class="order-summary__row">
+          <span class="order-summary__label">Envío a domicilio</span>
+          <span class="order-summary__value order-summary__value--free">Gratis</span>
+        </div>
+
+        <div class="order-summary__divider"></div>
+
+        <div class="order-summary__row order-summary__row--total">
+          <span class="order-summary__label">Total estimado</span>
+          <span class="order-summary__value">
+            {{ formatPrice((items.length > 0 ? summary : previousSummary).total) }} USD
+          </span>
+        </div>
+      </section>
+    } @else {
+      <!-- Empty Cart State -->
+      <section class="cart-empty" aria-label="Carrito vacío">
+        <div class="cart-empty__icon-circle">
+          <hugeicons-icon
+            [icon]="ShoppingBag01Icon"
+            [size]="46"
+            [strokeWidth]="1.5"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </div>
+
+        <h2 class="cart-empty__title">Tu carrito está vacío</h2>
+        <p class="cart-empty__description">
+          Aún no has agregado medicamentos o productos a tu carrito. Explora nuestro catálogo y descubre los mejores precios con envío sin costo.
+        </p>
+
+        <button
+          type="button"
+          class="cart-empty__cta-btn"
+          (click)="goToCatalog()"
+        >
+          Explorar catálogo
+        </button>
+      </section>
+    }
+  </div>
+</ion-content>
+
+<!-- Bottom Checkout Bar (Above persistent bottom nav) -->
+@if (items.length > 0) {
+  <footer class="cart-footer">
+    <div class="cart-footer__total-group">
+      <span class="cart-footer__total-label">Total:</span>
+      <div class="cart-footer__price-col">
+        <span class="cart-footer__total-amount">
+          {{ formatPrice(summary.total) }} USD
+        </span>
+        <span class="cart-footer__free-shipping">Envio gratis</span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="cart-footer__checkout-btn"
+      [disabled]="isSubmitting()"
+      (click)="proceedToCheckout()"
+    >
+      @if (isSubmitting()) {
+        <span class="btn-spinner" aria-hidden="true"></span>
+        <span>Procesando orden...</span>
+      } @else {
+        <span>Proceder al pago</span>
+      }
+    </button>
+  </footer>
+}
+
+<!-- Order Submitted Modal / Feedback -->
+@if (isOrderModalOpen() && confirmedOrder(); as order) {
+  <div class="order-modal-backdrop" (click)="closeOrderModal()">
+    <div
+      class="order-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="order-modal__icon">
+        <hugeicons-icon
+          [icon]="CheckmarkCircle02Icon"
+          [size]="48"
+          [strokeWidth]="2"
+          color="#16a34a"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </div>
+
+      <h3 id="order-modal-title" class="order-modal__title">¡Orden enviada al servidor!</h3>
+      <p class="order-modal__subtitle">
+        Tu pedido ha sido despachado con éxito. Hemos generado tu identificador de seguimiento.
+      </p>
+
+      <div class="order-modal__card">
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Número de orden</span>
+          <span class="order-modal__card-val order-modal__card-val--id">{{ order.orderId }}</span>
+        </div>
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Productos</span>
+          <span class="order-modal__card-val">{{ order.totalItems }} unidades</span>
+        </div>
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Subtotal</span>
+          <span class="order-modal__card-val">{{ formatPrice(order.subtotal) }} USD</span>
+        </div>
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Impuestos (10.4%)</span>
+          <span class="order-modal__card-val">{{ formatPrice(order.tax) }} USD</span>
+        </div>
+        <div class="order-modal__row order-modal__row--total">
+          <span class="order-modal__card-label">Total pagado</span>
+          <span class="order-modal__card-val">{{ formatPrice(order.total) }} USD</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="order-modal__confirm-btn"
+        (click)="closeOrderModal()"
+      >
+        Seguir comprando
+      </button>
+    </div>
+  </div>
+}
