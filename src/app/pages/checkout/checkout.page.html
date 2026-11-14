@@ -1,0 +1,292 @@
+<ion-header class="ion-no-border checkout-header">
+  <ion-toolbar class="checkout-toolbar">
+    <button
+      slot="start"
+      type="button"
+      class="checkout-back-btn"
+      aria-label="Volver al carrito"
+      (click)="goBack()"
+    >
+      <hugeicons-icon
+        [icon]="ArrowLeft02Icon"
+        [size]="22"
+        [strokeWidth]="2"
+        color="currentColor"
+        aria-hidden="true"
+      ></hugeicons-icon>
+    </button>
+
+    <ion-title class="checkout-toolbar__title">Finalizar Pedido</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="checkout-content">
+  <div class="checkout-wrapper">
+    <!-- 1. DIRECCIÓN DE ENTREGA -->
+    <section class="checkout-card" aria-labelledby="section-address-title">
+      <div class="checkout-card__header">
+        <h2 id="section-address-title" class="checkout-card__title">
+          1. DIRECCIÓN DE ENTREGA
+        </h2>
+        <span class="checkout-card__badge-text">ENVÍO EXPRESS</span>
+      </div>
+
+      <div class="checkout-form-grid">
+        <div class="checkout-row-2">
+          <div class="input-group">
+            <label class="input-label" for="co-fullname">Nombre Completo</label>
+            <input
+              id="co-fullname"
+              name="fullName"
+              type="text"
+              class="input-control"
+              [class.input-control--invalid]="submitted && !fullName.trim()"
+              placeholder="Tatiana Ayala"
+              [(ngModel)]="fullName"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="co-phone">Teléfono</label>
+            <input
+              id="co-phone"
+              name="phone"
+              type="tel"
+              class="input-control"
+              [class.input-control--invalid]="submitted && !phone.trim()"
+              placeholder="+503 9988-7766"
+              [(ngModel)]="phone"
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="co-address">Dirección de Residencia</label>
+          <input
+            id="co-address"
+            name="address"
+            type="text"
+            class="input-control"
+            [class.input-control--invalid]="submitted && !address.trim()"
+            placeholder="Col. Miraflores, Bloque B, Casa #12"
+            [(ngModel)]="address"
+          />
+        </div>
+
+        <div class="checkout-row-2">
+          <div class="input-group">
+            <label class="input-label" for="co-city">Ciudad</label>
+            <input
+              id="co-city"
+              name="city"
+              type="text"
+              class="input-control"
+              [class.input-control--invalid]="submitted && !city.trim()"
+              placeholder="San Salvador"
+              [(ngModel)]="city"
+            />
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="co-postal">Código Postal</label>
+            <input
+              id="co-postal"
+              name="postalCode"
+              type="text"
+              class="input-control"
+              [class.input-control--invalid]="submitted && !postalCode.trim()"
+              placeholder="11101"
+              [(ngModel)]="postalCode"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MÉTODO DE PAGO -->
+    <section class="checkout-card" aria-labelledby="section-payment-title">
+      <div class="checkout-card__header">
+        <h2 id="section-payment-title" class="checkout-card__title">
+          2. MÉTODO DE PAGO
+        </h2>
+        <span class="ssl-pill">SSL 256-BIT</span>
+      </div>
+
+      <div class="payment-options" role="radiogroup" aria-label="Método de pago">
+        <button
+          type="button"
+          class="payment-option"
+          [class.payment-option--selected]="paymentMethod === 'card'"
+          role="radio"
+          [attr.aria-checked]="paymentMethod === 'card'"
+          (click)="selectPaymentMethod('card')"
+        >
+          <div class="payment-option__left">
+            <span class="radio-circle" aria-hidden="true">
+              <span class="radio-circle__dot"></span>
+            </span>
+            <span class="payment-option__name">Tarjeta de Crédito / Débito</span>
+          </div>
+          <span class="payment-option__meta">•••• 4242</span>
+        </button>
+
+        <button
+          type="button"
+          class="payment-option"
+          [class.payment-option--selected]="paymentMethod === 'cash_on_delivery'"
+          role="radio"
+          [attr.aria-checked]="paymentMethod === 'cash_on_delivery'"
+          (click)="selectPaymentMethod('cash_on_delivery')"
+        >
+          <div class="payment-option__left">
+            <span class="radio-circle" aria-hidden="true">
+              <span class="radio-circle__dot"></span>
+            </span>
+            <span class="payment-option__name">Pago Contra Entrega</span>
+          </div>
+          <span class="payment-option__meta payment-option__meta--green">
+            Efectivo / POS
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. RESUMEN DE LA ORDEN -->
+    @if ((items.length > 0 ? summary : previousSummary); as activeSummary) {
+      <section class="checkout-card" aria-labelledby="section-summary-title">
+        <div class="checkout-card__header">
+          <h2 id="section-summary-title" class="checkout-card__title">
+            3. RESUMEN DE LA ORDEN
+          </h2>
+          <span class="checkout-card__items-count">
+            {{ activeSummary.itemCount }}
+            {{ activeSummary.itemCount === 1 ? 'ARTÍCULO' : 'ARTÍCULOS' }}
+          </span>
+        </div>
+
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span class="summary-row__label">Subtotal productos</span>
+            <span class="summary-row__val">{{ formatPrice(activeSummary.subtotal) }} USD</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-row__label">Impuestos (10.4%)</span>
+            <span class="summary-row__val">{{ formatPrice(activeSummary.tax) }} USD</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-row__label">Envío express</span>
+            <span class="summary-row__val summary-row__val--free">GRATIS</span>
+          </div>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-total-row">
+          <span class="summary-total-row__label">Total a Pagar</span>
+          <span class="summary-total-row__amount">
+            {{ formatPrice(activeSummary.total) }} USD
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="confirm-pay-btn"
+          [disabled]="isSubmitting()"
+          (click)="confirmAndPay()"
+        >
+          @if (isSubmitting()) {
+            <span class="btn-spinner" aria-hidden="true"></span>
+            <span>Procesando pago...</span>
+          } @else {
+            <hugeicons-icon
+              [icon]="Tick02Icon"
+              [size]="19"
+              [strokeWidth]="2.5"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span>Confirmar y Pagar {{ formatPrice(activeSummary.total) }} USD</span>
+          }
+        </button>
+
+        <p class="checkout-privacy-note">
+          Al comprar aceptas nuestras
+          <button
+            type="button"
+            class="checkout-privacy-note__link"
+            (click)="openPrivacyPolicy()"
+          >
+            Políticas de Privacidad
+          </button>
+        </p>
+      </section>
+    }
+  </div>
+</ion-content>
+
+<!-- Order Confirmation Modal -->
+@if (isOrderModalOpen() && confirmedOrder(); as order) {
+  <div class="order-modal-backdrop" (click)="closeOrderModal()">
+    <div
+      class="order-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkout-order-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="order-modal__icon">
+        <hugeicons-icon
+          [icon]="CheckmarkCircle02Icon"
+          [size]="50"
+          [strokeWidth]="2"
+          color="#16a34a"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </div>
+
+      <h3 id="checkout-order-modal-title" class="order-modal__title">
+        ¡Orden enviada al servidor!
+      </h3>
+      <p class="order-modal__subtitle">
+        Tu pedido ha sido confirmado y será enviado a {{ order.shippingInfo?.address }}.
+      </p>
+
+      <div class="order-modal__card">
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Número de orden</span>
+          <span class="order-modal__card-val order-modal__card-val--id">
+            {{ order.orderId }}
+          </span>
+        </div>
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Método de pago</span>
+          <span class="order-modal__card-val">
+            {{
+              order.paymentMethod === 'card'
+                ? 'Tarjeta •••• 4242'
+                : 'Pago Contra Entrega'
+            }}
+          </span>
+        </div>
+        <div class="order-modal__row">
+          <span class="order-modal__card-label">Productos</span>
+          <span class="order-modal__card-val">{{ order.totalItems }} unidades</span>
+        </div>
+        <div class="order-modal__row order-modal__row--total">
+          <span class="order-modal__card-label">Total pagado</span>
+          <span class="order-modal__card-val">{{ formatPrice(order.total) }} USD</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="order-modal__confirm-btn"
+        (click)="closeOrderModal()"
+      >
+        Seguir comprando
+      </button>
+    </div>
+  </div>
+}

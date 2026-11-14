@@ -1,0 +1,227 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #ffffff;
+  font-family: var(--font-body, 'Geist', sans-serif);
+}
+
+.auth-content {
+  --background: linear-gradient(180deg, #dcf5e6 0%, #effaf3 18%, #ffffff 38%);
+}
+
+.auth-page {
+  min-height: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px
+    calc(28px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.auth-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+.auth-titles {
+  margin-bottom: 28px;
+}
+
+.auth-eyebrow {
+  margin: 0 0 2px;
+  font-family: var(--font-body, 'Geist', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: #8b95a5;
+  letter-spacing: -0.01em;
+}
+
+.auth-title {
+  margin: 0;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 27px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field-label {
+  font-family: var(--font-body, 'Geist', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.field-input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: #f5f6f8;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:focus-within {
+    background: #ffffff;
+    border-color: #4e812e;
+    box-shadow: 0 0 0 3px rgba(78, 129, 46, 0.1);
+  }
+
+  &--invalid {
+    border-color: #ef4444;
+    background: #fffafa;
+  }
+}
+
+.field-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.field-input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body, 'Geist', sans-serif);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #0f172a;
+
+  &::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+  }
+}
+
+.field-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.field-error {
+  font-size: 11.5px;
+  color: #dc2626;
+  font-weight: 500;
+  padding-left: 2px;
+}
+
+.auth-error-banner {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.auth-switch-link {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13.5px;
+  color: #64748b;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 0 4px;
+    color: #0f172a;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+.auth-spacer {
+  flex: 1;
+  min-height: 32px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  height: 54px;
+  border-radius: 9999px;
+  border: 0;
+  background: #09090b;
+  color: #ffffff;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  box-shadow: 0 6px 18px rgba(9, 9, 11, 0.16);
+
+  &:hover:not([disabled]) {
+    background: #18181b;
+  }
+
+  &:active:not([disabled]) {
+    transform: scale(0.985);
+  }
+
+  &[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}

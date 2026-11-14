@@ -1,0 +1,76 @@
+<ion-content [fullscreen]="true" class="welcome-content">
+  <div class="welcome-screen">
+    <!-- Full-bleed background photo -->
+    <img
+      src="assets/images/login.png"
+      alt="Familia utilizando la farmacia digital LifeMedic"
+      class="welcome-bg"
+    />
+
+    <!-- Seamless forest-green gradient overlay matching login.png fade -->
+    <div class="welcome-overlay" aria-hidden="true"></div>
+
+    <!-- Top Back Navigation -->
+    <header class="welcome-top-bar">
+      <button
+        type="button"
+        class="welcome-back-btn"
+        aria-label="Volver atrás"
+        (click)="goBack()"
+      >
+        <hugeicons-icon
+          [icon]="ArrowLeft02Icon"
+          [size]="20"
+          [strokeWidth]="2"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </header>
+
+    <!-- Bottom Content Block -->
+    <main class="welcome-bottom">
+      <h1 class="welcome-headline">
+        La farmacia<br />
+        digital de tu<br />
+        familia
+      </h1>
+
+      <div class="welcome-actions">
+        <button
+          type="button"
+          class="welcome-btn welcome-btn--primary"
+          (click)="goToRegister()"
+        >
+          Registrarse
+        </button>
+
+        <button
+          type="button"
+          class="welcome-btn welcome-btn--secondary"
+          (click)="goToLogin()"
+        >
+          <hugeicons-icon
+            [icon]="Mail01Icon"
+            [size]="19"
+            [strokeWidth]="1.9"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+          <span>Iniciar sesión</span>
+        </button>
+      </div>
+
+      <p class="welcome-terms">
+        Al continuar, aceptas nuestros
+        <button type="button" class="welcome-terms__link" (click)="openPolicy('terms')">
+          Términos
+        </button>
+        y
+        <button type="button" class="welcome-terms__link" (click)="openPolicy('privacy')">
+          Política de Privacidad
+        </button>.
+      </p>
+    </main>
+  </div>
+</ion-content>

@@ -20,6 +20,23 @@ const routes: Routes = [
       import('./pages/cart/cart.module').then((m) => m.CartPageModule),
   },
   {
+    path: 'checkout',
+    loadChildren: () =>
+      import('./pages/checkout/checkout.module').then(
+        (m) => m.CheckoutPageModule,
+      ),
+  },
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./pages/auth/auth.module').then((m) => m.AuthPageModule),
+  },
+  {
+    path: 'account',
+    loadChildren: () =>
+      import('./pages/account/account.module').then((m) => m.AccountPageModule),
+  },
+  {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',

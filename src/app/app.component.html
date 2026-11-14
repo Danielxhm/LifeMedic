@@ -1,4 +1,6 @@
 <ion-app>
   <ion-router-outlet [animated]="false"></ion-router-outlet>
-  <app-bottom-nav></app-bottom-nav>
+  @if (showBottomNav) {
+    <app-bottom-nav></app-bottom-nav>
+  }
 </ion-app>

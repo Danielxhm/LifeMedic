@@ -28,6 +28,22 @@ export interface OrderItem {
   subtotal: number;
 }
 
+export type PaymentMethodType = 'card' | 'cash_on_delivery';
+
+export interface CheckoutShippingInfo {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+}
+
+export interface OrderMetadata {
+  shippingInfo?: CheckoutShippingInfo;
+  paymentMethod?: PaymentMethodType;
+  customerNotes?: string;
+}
+
 export interface OrderPayload {
   orderId: string;
   items: OrderItem[];
@@ -39,6 +55,8 @@ export interface OrderPayload {
   totalItems: number;
   status: 'pending' | 'submitted' | 'confirmed';
   createdAt: string;
+  shippingInfo?: CheckoutShippingInfo;
+  paymentMethod?: PaymentMethodType;
 }
 
 export interface CartActionResult {
@@ -254,11 +272,18 @@ export class CartService {
   /**
    * Prepares and dispatches order payload ready for backend server submission.
    */
-  async submitOrder(customerNotes?: string): Promise<OrderPayload> {
+  async submitOrder(
+    metadataOrNotes?: string | OrderMetadata,
+  ): Promise<OrderPayload> {
     const items = this.getItems();
     if (items.length === 0) {
       throw new Error('El carrito está vacío');
     }
+
+    const metadata: OrderMetadata =
+      typeof metadataOrNotes === 'string'
+        ? { customerNotes: metadataOrNotes }
+        : (metadataOrNotes ?? {});
 
     const summary = this.getSummary();
     const orderItems: OrderItem[] = items.map((item) => ({
@@ -282,6 +307,8 @@ export class CartService {
       totalItems: summary.itemCount,
       status: 'confirmed',
       createdAt: new Date().toISOString(),
+      shippingInfo: metadata.shippingInfo,
+      paymentMethod: metadata.paymentMethod,
     };
 
     // Simulate server network call

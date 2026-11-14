@@ -1,0 +1,69 @@
+<ion-content [fullscreen]="true" class="subpage-content">
+  <div class="subpage-container">
+    <header class="subpage-header">
+      <button
+        type="button"
+        class="subpage-back-btn"
+        aria-label="Volver a perfil"
+        (click)="goBack()"
+      >
+        <hugeicons-icon
+          [icon]="ArrowLeft02Icon"
+          [size]="20"
+          [strokeWidth]="2"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </header>
+
+    <div class="subpage-titles">
+      <h1 class="subpage-title">Cambiar correo</h1>
+      <p class="subpage-subtitle">
+        Ingresa el nuevo correo electrónico para actualizarlo
+      </p>
+    </div>
+
+    <form class="subpage-form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="subpage-fields">
+        <div class="sub-field-group">
+          <div
+            class="sub-field-box"
+            [class.sub-field-box--invalid]="submitted && !isEmailValid"
+          >
+            <span class="sub-field-icon" aria-hidden="true">
+              <hugeicons-icon
+                [icon]="Mail01Icon"
+                [size]="18"
+                [strokeWidth]="1.8"
+                color="currentColor"
+              ></hugeicons-icon>
+            </span>
+            <input
+              id="update-email"
+              name="email"
+              type="email"
+              class="sub-field-input"
+              placeholder="ejemplo@gmail.com"
+              [(ngModel)]="email"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div class="subpage-error" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="subpage-spacer"></div>
+
+      <button type="submit" class="subpage-submit-btn">
+        Actualizar
+      </button>
+    </form>
+  </div>
+</ion-content>

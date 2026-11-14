@@ -13,9 +13,15 @@ describe('ProductsService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should return 8 products', () => {
+  it('should return 36 products and cover all catalog categories', () => {
     const products = service.getProducts();
-    expect(products.length).toBe(8);
+    expect(products.length).toBe(36);
+    const categoryIds = new Set(products.map((p) => p.categoryId));
+    expect(categoryIds.has('dolor')).toBe(true);
+    expect(categoryIds.has('estomago')).toBe(true);
+    expect(categoryIds.has('alergias')).toBe(true);
+    expect(categoryIds.has('primeros-auxilios')).toBe(true);
+    expect(categoryIds.has('cuidado')).toBe(true);
   });
 
   it('should find Osteo-Bi Flex product by id 1', () => {

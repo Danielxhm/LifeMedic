@@ -1,0 +1,116 @@
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-page">
+    <header class="auth-header">
+      <button
+        type="button"
+        class="auth-back-btn"
+        aria-label="Volver atrás"
+        (click)="goBack()"
+      >
+        <hugeicons-icon
+          [icon]="ArrowLeft02Icon"
+          [size]="20"
+          [strokeWidth]="2"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </header>
+
+    <div class="auth-titles">
+      <p class="auth-eyebrow">Introduce</p>
+      <h1 class="auth-title">Tu dirección de envío</h1>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onFinish()" novalidate>
+      <div class="auth-fields">
+        <div class="field-group">
+          <label class="field-label" for="addr-street">Dirección de entrega</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !street.trim()"
+          >
+            <input
+              id="addr-street"
+              name="street"
+              type="text"
+              class="field-input"
+              placeholder="Ej. Calle 123, Piso 4"
+              [(ngModel)]="street"
+              autocomplete="street-address"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="addr-municipality">Municipio</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !municipality.trim()"
+          >
+            <input
+              id="addr-municipality"
+              name="municipality"
+              type="text"
+              class="field-input"
+              placeholder="Santa Tecla"
+              [(ngModel)]="municipality"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="addr-city">Ciudad</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !city.trim()"
+          >
+            <input
+              id="addr-city"
+              name="city"
+              type="text"
+              class="field-input"
+              placeholder="Santa Tecla"
+              [(ngModel)]="city"
+              autocomplete="address-level2"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="addr-postal">Código postal</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !postalCode.trim()"
+          >
+            <input
+              id="addr-postal"
+              name="postalCode"
+              type="text"
+              class="field-input"
+              placeholder="11090"
+              [(ngModel)]="postalCode"
+              autocomplete="postal-code"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div class="auth-error-banner" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div class="auth-spacer"></div>
+
+      <button type="submit" class="auth-submit-btn">
+        Finalizar
+      </button>
+    </form>
+  </div>
+</ion-content>

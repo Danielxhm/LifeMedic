@@ -1,0 +1,114 @@
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-page">
+    <header class="auth-header">
+      <button
+        type="button"
+        class="auth-back-btn"
+        aria-label="Volver atrás"
+        (click)="goBack()"
+      >
+        <hugeicons-icon
+          [icon]="ArrowLeft02Icon"
+          [size]="20"
+          [strokeWidth]="2"
+          color="currentColor"
+          aria-hidden="true"
+        ></hugeicons-icon>
+      </button>
+    </header>
+
+    <div class="auth-titles">
+      <p class="auth-eyebrow">Bienvenido de nuevo</p>
+      <h1 class="auth-title">Iniciar sesión</h1>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="auth-fields">
+        <div class="field-group">
+          <label class="field-label" for="login-email">Correo electrónico</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !email.trim()"
+          >
+            <span class="field-icon" aria-hidden="true">
+              <hugeicons-icon
+                [icon]="Mail01Icon"
+                [size]="18"
+                [strokeWidth]="1.8"
+                color="currentColor"
+              ></hugeicons-icon>
+            </span>
+            <input
+              id="login-email"
+              name="email"
+              type="email"
+              class="field-input"
+              placeholder="tatiana@itca.edu.sv"
+              [(ngModel)]="email"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="login-password">Contraseña</label>
+          <div
+            class="field-input-box"
+            [class.field-input-box--invalid]="submitted && !password"
+          >
+            <span class="field-icon" aria-hidden="true">
+              <hugeicons-icon
+                [icon]="SquareLock02Icon"
+                [size]="18"
+                [strokeWidth]="1.8"
+                color="currentColor"
+              ></hugeicons-icon>
+            </span>
+            <input
+              id="login-password"
+              name="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="field-input"
+              placeholder="••••••"
+              [(ngModel)]="password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="field-toggle-btn"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              (click)="togglePasswordVisibility()"
+            >
+              <hugeicons-icon
+                [icon]="showPassword ? ViewIcon : ViewOffSlashIcon"
+                [size]="18"
+                [strokeWidth]="1.8"
+                color="currentColor"
+                aria-hidden="true"
+              ></hugeicons-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div class="auth-error-banner" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <p class="auth-switch-link">
+        ¿No tienes cuenta?
+        <button type="button" (click)="goToRegister()">Regístrate aquí</button>
+      </p>
+
+      <div class="auth-spacer"></div>
+
+      <button type="submit" class="auth-submit-btn">
+        Iniciar sesión
+      </button>
+    </form>
+  </div>
+</ion-content>

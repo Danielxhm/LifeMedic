@@ -1,0 +1,208 @@
+<ion-header class="ion-no-border account-header">
+  <ion-toolbar class="account-toolbar">
+    <ion-title class="account-toolbar__title">Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="account-content">
+  <div class="account-wrapper">
+    @if (user) {
+      <!-- Profile Summary Card matching mockup -->
+      <section class="profile-hero-card">
+        <button
+          type="button"
+          class="profile-edit-btn"
+          aria-label="Editar datos personales"
+          (click)="goToEditProfile()"
+        >
+          <hugeicons-icon
+            [icon]="PencilEdit01Icon"
+            [size]="18"
+            [strokeWidth]="1.8"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+
+        <div class="profile-avatar-ring">
+          <div class="profile-avatar">{{ getInitials() }}</div>
+        </div>
+
+        <h1 class="profile-fullname">
+          <span>{{ user.firstName }} {{ user.lastName }}</span>
+          <hugeicons-icon
+            [icon]="Link01Icon"
+            [size]="14"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </h1>
+        <p class="profile-role">{{ user.email }}</p>
+      </section>
+
+      <!-- Menu Group 1: Personal data, Email, Password -->
+      <section class="menu-card" aria-label="Configuración de cuenta">
+        <button type="button" class="menu-row" (click)="goToEditProfile()">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="UserAccountIcon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Datos personales</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+
+        <button type="button" class="menu-row" (click)="goToChangeEmail()">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="MailAdd01Icon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Cambiar correo</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+
+        <button type="button" class="menu-row" (click)="goToChangePassword()">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="Notification01Icon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Cambiar Contraseña</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      </section>
+
+      <!-- Menu Group 2: Static buttons without navigation -->
+      <section class="menu-card" aria-label="Soporte y políticas">
+        <button type="button" class="menu-row">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="HeadphonesIcon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Soporte Técnico</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+
+        <button type="button" class="menu-row">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="File01Icon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Políticas de privacidad</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      </section>
+
+      <!-- Menu Group 3: Logout -->
+      <section class="menu-card" aria-label="Sesión">
+        <button type="button" class="menu-row menu-row--danger" (click)="logout()">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="Delete02Icon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Cerrar sesión</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#f87171"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      </section>
+    } @else {
+      <!-- Guest State -->
+      <section class="guest-card">
+        <div class="guest-icon">
+          <hugeicons-icon
+            [icon]="UserCircleIcon"
+            [size]="44"
+            [strokeWidth]="1.5"
+            color="#4e812e"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </div>
+        <h1 class="guest-title">Tu cuenta LifeMedic</h1>
+        <p class="guest-subtitle">
+          Inicia sesión o regístrate para administrar tus datos personales y dirección de entrega.
+        </p>
+
+        <div class="guest-actions">
+          <button
+            type="button"
+            class="guest-btn guest-btn--primary"
+            (click)="goToWelcome()"
+          >
+            Iniciar sesión
+          </button>
+          <button
+            type="button"
+            class="guest-btn guest-btn--outline"
+            (click)="goToRegister()"
+          >
+            Crear cuenta nueva
+          </button>
+        </div>
+      </section>
+    }
+  </div>
+</ion-content>

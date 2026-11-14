@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import {
   NavController,
@@ -10,12 +10,15 @@ import {
 
 import { CartPage } from './cart.page';
 import { CartPageModule } from './cart.module';
+import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 
 describe('CartPage', () => {
   let component: CartPage;
   let fixture: ComponentFixture<CartPage>;
   let cartService: CartService;
+  let authService: AuthService;
+  let router: Router;
 
   const mockLoading = {
     present: vi.fn().mockResolvedValue(true),
@@ -42,6 +45,7 @@ describe('CartPage', () => {
       ],
       providers: [
         CartService,
+        AuthService,
         NavController,
         { provide: ToastController, useValue: mockToastCtrl },
         AlertController,
@@ -51,6 +55,9 @@ describe('CartPage', () => {
     }).compileComponents();
 
     cartService = TestBed.inject(CartService);
+    authService = TestBed.inject(AuthService);
+    authService.logout();
+    router = TestBed.inject(Router);
     fixture = TestBed.createComponent(CartPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -118,15 +125,37 @@ describe('CartPage', () => {
     expect(component.items.length).toBe(initialCount - 1);
   });
 
-  it('should proceed to checkout, dispatch order to server, and open order modal', async () => {
-    expect(component.isOrderModalOpen()).toBe(false);
-    await component.proceedToCheckout();
-    fixture.detectChanges();
+  it('should redirect to login/welcome screen when unauthenticated on checkout', async () => {
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    authService.logout();
 
-    expect(component.confirmedOrder()).toBeTruthy();
-    expect(component.confirmedOrder()?.orderId).toMatch(/^LM-/);
-    expect(component.confirmedOrder()?.total).toBe(143.5);
-    expect(component.isOrderModalOpen()).toBe(true);
+    await component.proceedToCheckout();
+
+    expect(navSpy).toHaveBeenCalledWith(['/auth/welcome'], {
+      queryParams: { returnUrl: '/checkout' },
+    });
+  });
+
+  it('should proceed directly to checkout page when user is authenticated', async () => {
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    authService.completeRegistration(
+      {
+        street: 'Col. Miraflores, Bloque B, Casa #12',
+        municipality: 'San Salvador',
+        city: 'San Salvador',
+        postalCode: '11101',
+      },
+      {
+        firstName: 'Tatiana',
+        lastName: 'Ayala',
+        email: 'tatiana@itca.edu.sv',
+        password: 'password123',
+      },
+    );
+
+    await component.proceedToCheckout();
+
+    expect(navSpy).toHaveBeenCalledWith(['/checkout']);
   });
 
   it('should close order modal and reset state', () => {

@@ -22,9 +22,9 @@ describe('ProductsPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with 8 products', () => {
-    expect(component.products.length).toBe(8);
-    expect(component.filteredProducts.length).toBe(8);
+  it('should initialize with 36 products', () => {
+    expect(component.products.length).toBe(36);
+    expect(component.filteredProducts.length).toBe(36);
   });
 
   it('should filter products by search query', () => {
@@ -35,6 +35,6 @@ describe('ProductsPage', () => {
 
   it('should filter products by category', () => {
     component.selectCategory('estomago');
-    expect(component.filteredProducts.length).toBe(2);
+    expect(component.filteredProducts.length).toBe(7);
   });
 });

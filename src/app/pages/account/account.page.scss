@@ -1,0 +1,225 @@
+:host {
+  display: block;
+  font-family: var(--font-body, 'Geist', sans-serif);
+  color: #0f172a;
+}
+
+.account-header {
+  box-shadow: none;
+}
+
+.account-toolbar {
+  --background: #ffffff;
+  --min-height: 54px;
+}
+
+.account-toolbar__title {
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  letter-spacing: -0.015em;
+}
+
+.account-content {
+  --background: #ffffff;
+}
+
+.account-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 8px 18px calc(84px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Profile Hero Card matching mockup */
+.profile-hero-card {
+  position: relative;
+  background: #f8f9fb;
+  border-radius: 22px;
+  padding: 26px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile-edit-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+
+  &:active {
+    background-color: #e2e8f0;
+    transform: scale(0.92);
+  }
+}
+
+.profile-avatar-ring {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, #bae6fd, #38bdf8);
+  margin-bottom: 12px;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #0d3124, #2d6a4f);
+  color: #ffffff;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-fullname {
+  margin: 0 0 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 17.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.profile-role {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Grouped List Cards */
+.menu-card {
+  background: #f8f9fb;
+  border-radius: 20px;
+  padding: 4px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 2px;
+  border: 0;
+  border-bottom: 1px solid #eef0f4;
+  background: transparent;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:active {
+    opacity: 0.65;
+  }
+
+  &--danger {
+    color: #ef4444;
+
+    .menu-row__label {
+      color: #ef4444;
+    }
+  }
+}
+
+.menu-row__left {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.menu-row__label {
+  font-family: var(--font-body, 'Geist', sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Guest Card */
+.guest-card {
+  background: #f8f9fb;
+  border-radius: 22px;
+  text-align: center;
+  padding: 32px 22px;
+}
+
+.guest-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #effaf3;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guest-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.guest-subtitle {
+  margin: 0 0 22px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.guest-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guest-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 9999px;
+  font-family: var(--font-display, 'Google Sans', sans-serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--primary {
+    border: 0;
+    background: #09090b;
+    color: #ffffff;
+  }
+
+  &--outline {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+  }
+}

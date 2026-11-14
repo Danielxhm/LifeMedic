@@ -21,6 +21,7 @@ import {
   AlertCircleIcon,
   Delete02Icon,
 } from '@hugeicons/core-free-icons';
+import { AuthService } from '../../services/auth.service';
 import {
   CartService,
   CartItem,
@@ -40,6 +41,7 @@ export class CartPage implements OnInit {
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly authService = inject(AuthService);
   readonly cartService = inject(CartService);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
@@ -194,20 +196,14 @@ export class CartPage implements OnInit {
   async proceedToCheckout(): Promise<void> {
     if (this.items.length === 0 || this.isSubmitting()) return;
 
-    this.isSubmitting.set(true);
-    this.cdr.markForCheck();
-
-    try {
-      const order = await this.cartService.submitOrder();
-      this.confirmedOrder.set(order);
-      this.isSubmitting.set(false);
-      this.isOrderModalOpen.set(true);
-      this.cdr.detectChanges();
-    } catch {
-      this.isSubmitting.set(false);
-      this.cdr.detectChanges();
-      await this.showToast('Error al procesar el pedido. Intenta nuevamente.', 'danger');
+    if (!this.authService.isLoggedIn()) {
+      await this.router.navigate(['/auth/welcome'], {
+        queryParams: { returnUrl: '/checkout' },
+      });
+      return;
     }
+
+    await this.router.navigate(['/checkout']);
   }
 
   closeOrderModal(): void {
