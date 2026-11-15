@@ -1,9 +1,15 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ProductCardComponent,
   Product,
 } from '../product-card/product-card.component';
+import { CatalogApiService } from '../../services/catalog-api.service';
 
 @Component({
   selector: 'app-new-arrivals',
@@ -12,35 +18,24 @@ import {
   templateUrl: './new-arrivals.component.html',
   styleUrls: ['./new-arrivals.component.scss'],
 })
-export class NewArrivalsComponent {
+export class NewArrivalsComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly catalogApi = inject(CatalogApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  readonly newestProducts: Product[] = [
-    {
-      id: 1,
-      brand: 'MURAD',
-      name: 'Crema de Noche con Retinol',
-      price: 25.0,
-      currency: 'USD',
-      image: 'assets/images/retinol.png',
-      badge: 'NUEVO',
-      badgeType: 'dark',
-      createdAt: '2026-10-28',
-      isFavorite: false,
-    },
-    {
-      id: 2,
-      brand: 'PROTECCIÓN DIARIA',
-      name: 'Protector solar FPS 50+',
-      price: 14.5,
-      currency: 'USD',
-      image: 'assets/images/protector-solar.png',
-      badge: 'OFERTA',
-      badgeType: 'green',
-      createdAt: '2026-10-25',
-      isFavorite: false,
-    },
-  ];
+  newestProducts: Product[] = [];
+
+  ngOnInit(): void {
+    this.catalogApi.getHomeProducts().subscribe({
+      next: (products) => {
+        this.newestProducts = products;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('No se pudieron cargar los productos:', error);
+      },
+    });
+  }
 
   toggleFavorite(product: Product): void {
     product.isFavorite = !product.isFavorite;

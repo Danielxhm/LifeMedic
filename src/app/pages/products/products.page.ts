@@ -1,5 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular/lazy';
 import {
   Search01Icon,
@@ -8,6 +13,7 @@ import {
   ChevronDownIcon,
 } from '@hugeicons/core-free-icons';
 import { Product } from '../../components/product-card/product-card.component';
+import { CatalogApiService } from '../../services/catalog-api.service';
 import { ProductsService } from '../../services/products.service';
 
 export interface CategoryTab {
@@ -23,8 +29,11 @@ export interface CategoryTab {
 })
 export class ProductsPage implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly toastCtrl = inject(ToastController);
   private readonly productsService = inject(ProductsService);
+  private readonly catalogApi = inject(CatalogApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly Search01Icon = Search01Icon;
   readonly Cancel01Icon = Cancel01Icon;
@@ -37,14 +46,8 @@ export class ProductsPage implements OnInit {
   selectedSort = 'destacados';
   isSortModalOpen = false;
 
-  readonly categories: CategoryTab[] = [
-    { id: 'all', name: 'Todos' },
-    { id: 'dolor', name: 'Dolor y fiebre' },
-    { id: 'estomago', name: 'Estómago' },
-    { id: 'alergias', name: 'Alergias' },
-    { id: 'primeros-auxilios', name: 'Primeros auxilios' },
-    { id: 'cuidado', name: 'Cuidado de la piel' },
-  ];
+  categories: CategoryTab[] = [{ id: 'all', name: 'Todos' }];
+  products: Product[] = [];
 
   readonly sortOptions = [
     { id: 'destacados', label: 'Destacados' },
@@ -53,19 +56,40 @@ export class ProductsPage implements OnInit {
     { id: 'nombre-asc', label: 'Nombre A-Z' },
   ];
 
-  products: Product[] = [];
-
   ngOnInit(): void {
-    this.loadProducts();
-  }
+    this.searchQuery =
+      this.route.snapshot.queryParamMap.get('search') ?? '';
 
-  ionViewWillEnter(): void {
-    this.loadProducts();
-  }
+    this.selectedCategoryId =
+      this.route.snapshot.queryParamMap.get('categoryId') ?? 'all';
 
-  private loadProducts(): void {
-    this.products = this.productsService.getProducts();
-    this.cartCount = this.productsService.getCartCount();
+    this.catalogApi.getCatalogProducts().subscribe({
+      next: (products) => {
+        console.log('Productos recibidos de la API:', products.length, products);
+        this.products = products;
+        this.cartCount = this.productsService.getCartCount();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar productos de la API:', error);
+      },
+    });
+
+    this.catalogApi.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = [
+          { id: 'all', name: 'Todos' },
+          ...categories.map((category) => ({
+            id: String(category.id),
+            name: category.name,
+          })),
+        ];
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar categorías:', error);
+      },
+    });
   }
 
   get totalProductsCount(): number {
@@ -73,32 +97,33 @@ export class ProductsPage implements OnInit {
   }
 
   get selectedSortLabel(): string {
-    const found = this.sortOptions.find((o) => o.id === this.selectedSort);
+    const found = this.sortOptions.find(
+      (option) => option.id === this.selectedSort,
+    );
+
     return found ? found.label : 'Destacados';
   }
 
   get filteredProducts(): Product[] {
     let result = [...this.products];
 
-    // Filter by Category
     if (this.selectedCategoryId !== 'all') {
       result = result.filter(
-        (p) => p.categoryId === this.selectedCategoryId,
+        (product) => product.categoryId === this.selectedCategoryId,
       );
     }
 
-    // Filter by Search Query
     const query = this.searchQuery.trim().toLowerCase();
+
     if (query) {
       result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.brand.toLowerCase().includes(query) ||
-          (p.category && p.category.toLowerCase().includes(query)),
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.brand.toLowerCase().includes(query) ||
+          (product.category?.toLowerCase().includes(query) ?? false),
       );
     }
 
-    // Sorting
     switch (this.selectedSort) {
       case 'precio-asc':
         result.sort((a, b) => a.price - b.price);
@@ -109,10 +134,8 @@ export class ProductsPage implements OnInit {
       case 'nombre-asc':
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
-      case 'destacados':
       default:
         result.sort((a, b) => a.id - b.id);
-        break;
     }
 
     return result;
@@ -123,8 +146,7 @@ export class ProductsPage implements OnInit {
   }
 
   onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchQuery = input.value;
+    this.searchQuery = (event.target as HTMLInputElement).value;
   }
 
   clearSearch(): void {
@@ -141,8 +163,8 @@ export class ProductsPage implements OnInit {
   }
 
   async toggleFavorite(product: Product): Promise<void> {
-    this.productsService.toggleFavorite(product.id);
     product.isFavorite = !product.isFavorite;
+
     const message = product.isFavorite
       ? `Añadido a favoritos: ${product.name}`
       : `Eliminado de favoritos: ${product.name}`;
@@ -153,11 +175,13 @@ export class ProductsPage implements OnInit {
       position: 'bottom',
       color: 'dark',
     });
+
     await toast.present();
   }
 
   async addToCart(product: Product): Promise<void> {
     this.cartCount = this.productsService.addToCart(product.id);
+
     const toast = await this.toastCtrl.create({
       message: `¡${product.name} añadido al carrito!`,
       duration: 2000,
@@ -172,6 +196,7 @@ export class ProductsPage implements OnInit {
         },
       ],
     });
+
     await toast.present();
   }
 }

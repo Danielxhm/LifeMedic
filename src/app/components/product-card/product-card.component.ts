@@ -12,6 +12,7 @@ import { FavouriteIcon, Add01Icon } from '@hugeicons/core-free-icons';
 
 export interface Product {
   id: number;
+  catalogType?: 'medicine' | 'product';
   brand: string;
   laboratory?: string;
   name: string;
@@ -59,7 +60,12 @@ export class ProductCardComponent {
 
   onCardClick(): void {
     this.cardClicked.emit(this.product);
-    this.router.navigate(['/products', this.product.id]);
+
+    this.router.navigate(['/products', this.product.id], {
+      queryParams: {
+        type: this.product.catalogType ?? 'medicine',
+      },
+    });
   }
 
   onToggleFavorite(event: Event): void {

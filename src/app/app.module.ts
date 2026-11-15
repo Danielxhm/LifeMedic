@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular/lazy';
 
@@ -12,6 +13,7 @@ import { BottomNavComponent } from './components/bottom-nav/bottom-nav.component
   declarations: [AppComponent],
   imports: [
     BrowserModule,
+    HttpClientModule,
     IonicModule.forRoot({
       animated: false,
     }),

@@ -1,4 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavController, ToastController } from '@ionic/angular/lazy';
 import {
@@ -11,6 +15,7 @@ import {
   FavouriteIcon,
 } from '@hugeicons/core-free-icons';
 import { Product } from '../../components/product-card/product-card.component';
+import { CatalogApiService } from '../../services/catalog-api.service';
 import { ProductsService } from '../../services/products.service';
 
 @Component({
@@ -19,12 +24,14 @@ import { ProductsService } from '../../services/products.service';
   styleUrls: ['./product-detail.page.scss'],
   standalone: false,
 })
-export class ProductDetailPage implements OnInit {
+export class ProductDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly navCtrl = inject(NavController);
   private readonly toastCtrl = inject(ToastController);
   private readonly productsService = inject(ProductsService);
+  private readonly catalogApi = inject(CatalogApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
   readonly ShoppingBag01Icon = ShoppingBag01Icon;
@@ -39,40 +46,45 @@ export class ProductDetailPage implements OnInit {
   selectedSize = '';
   cartCount = 4;
 
-  ngOnInit(): void {
-    this.cartCount = this.productsService.getCartCount();
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? parseInt(idParam, 10) : 1;
-    this.loadProduct(id);
-  }
-
   ionViewWillEnter(): void {
     this.cartCount = this.productsService.getCartCount();
+
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.loadProduct(parseInt(idParam, 10));
-    }
-  }
+    const id = idParam ? Number(idParam) : NaN;
+    const typeParam = this.route.snapshot.queryParamMap.get('type');
+    const type = typeParam === 'product' ? 'product' : 'medicine';
 
-  loadProduct(id: number): void {
-    const found = this.productsService.getProductById(id);
-    if (found) {
-      this.product = found;
-    } else {
-      this.product = this.productsService.getProductById(1) || null;
+    if (!Number.isInteger(id)) {
+      this.product = null;
+      return;
     }
 
-    if (this.product?.sizes && this.product.sizes.length > 0) {
-      this.selectedSize = this.product.sizes[0];
-    }
-    this.activeImageIndex = 0;
+    this.product = null;
+
+    this.catalogApi.getCatalogProductById(id, type).subscribe({
+      next: (product) => {
+        this.product = product;
+        this.selectedSize = product.sizes?.[0] ?? '';
+        this.activeImageIndex = 0;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('No se pudo cargar el detalle del producto:', error);
+        this.product = null;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   get galleryImages(): string[] {
-    if (!this.product) return [];
-    if (this.product.galleryImages && this.product.galleryImages.length > 0) {
+    if (!this.product) {
+      return [];
+    }
+
+    if (this.product.galleryImages?.length) {
       return this.product.galleryImages;
     }
+
     return [this.product.image];
   }
 
@@ -102,11 +114,14 @@ export class ProductDetailPage implements OnInit {
   }
 
   async toggleFavorite(): Promise<void> {
-    if (!this.product) return;
-    const isFav = this.productsService.toggleFavorite(this.product.id);
-    this.product.isFavorite = isFav;
+    if (!this.product) {
+      return;
+    }
 
-    const message = isFav
+    const isFavorite = this.productsService.toggleFavorite(this.product.id);
+    this.product.isFavorite = isFavorite;
+
+    const message = isFavorite
       ? `Añadido a favoritos: ${this.product.name}`
       : `Eliminado de favoritos: ${this.product.name}`;
 
@@ -116,11 +131,15 @@ export class ProductDetailPage implements OnInit {
       position: 'bottom',
       color: 'dark',
     });
+
     await toast.present();
   }
 
   async addToCart(): Promise<void> {
-    if (!this.product) return;
+    if (!this.product) {
+      return;
+    }
+
     this.cartCount = this.productsService.addToCart(
       this.product.id,
       1,
@@ -141,6 +160,7 @@ export class ProductDetailPage implements OnInit {
         },
       ],
     });
+
     await toast.present();
   }
 }

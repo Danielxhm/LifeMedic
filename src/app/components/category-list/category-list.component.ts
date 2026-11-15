@@ -1,10 +1,14 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { Router } from '@angular/router';
-
-interface Category {
-  id: number;
-  name: string;
-}
+import {
+  CatalogApiService,
+  Category,
+} from '../../services/catalog-api.service';
 
 @Component({
   selector: 'app-category-list',
@@ -12,22 +16,30 @@ interface Category {
   templateUrl: './category-list.component.html',
   styleUrls: ['./category-list.component.scss'],
 })
-export class CategoryListComponent {
+export class CategoryListComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly catalogApi = inject(CatalogApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  categories: Category[] = [
-    { id: 1, name: 'Fragancias' },
-    { id: 2, name: 'Maquillaje' },
-    { id: 3, name: 'Cabello' },
-    { id: 4, name: 'Cuidado de la piel' },
-    { id: 5, name: 'Protección solar' },
-  ];
-
+  categories: Category[] = [];
   selectedCategoryId: number | null = null;
 
+  ngOnInit(): void {
+    this.catalogApi.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('No se pudieron cargar las categorías:', error);
+      },
+    });
+  }
+
   selectCategory(categoryId: number): void {
-    this.selectedCategoryId =
-      this.selectedCategoryId === categoryId ? null : categoryId;
+    this.router.navigate(['/products'], {
+      queryParams: { categoryId: String(categoryId) },
+    });
   }
 
   viewAll(): void {
