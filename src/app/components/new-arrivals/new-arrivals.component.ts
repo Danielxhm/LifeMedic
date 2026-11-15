@@ -5,11 +5,13 @@ import {
   inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import {
   ProductCardComponent,
   Product,
 } from '../product-card/product-card.component';
 import { CatalogApiService } from '../../services/catalog-api.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-new-arrivals',
@@ -20,7 +22,9 @@ import { CatalogApiService } from '../../services/catalog-api.service';
 })
 export class NewArrivalsComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly toastCtrl = inject(ToastController);
   private readonly catalogApi = inject(CatalogApiService);
+  private readonly cartService = inject(CartService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   newestProducts: Product[] = [];
@@ -41,8 +45,31 @@ export class NewArrivalsComponent implements OnInit {
     product.isFavorite = !product.isFavorite;
   }
 
-  addToCart(product: Product): void {
-    console.log('Producto añadido al carrito:', product.name);
+  async addToCart(product: Product): Promise<void> {
+    const result = await this.cartService.addItem(product, 1);
+
+    try {
+      const toast = await this.toastCtrl.create({
+        message: result.message,
+        duration: 2000,
+        position: 'bottom',
+        color: result.success ? 'dark' : 'warning',
+        buttons: result.success
+          ? [
+              {
+                text: 'Ver',
+                handler: () => {
+                  this.router.navigate(['/cart']);
+                },
+              },
+            ]
+          : undefined,
+      });
+
+      await toast.present();
+    } catch {
+      // Ignore toast presentation errors in tests
+    }
   }
 
   viewAll(): void {

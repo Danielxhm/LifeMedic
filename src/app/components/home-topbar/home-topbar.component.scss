@@ -33,6 +33,13 @@
   color: #171923;
   background: #f5f6f8;
   cursor: pointer;
+
+  hugeicons-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
 }
 
 .home-topbar__cart ion-icon {

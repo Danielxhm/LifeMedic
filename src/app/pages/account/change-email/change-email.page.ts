@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import { ArrowLeft02Icon, Mail01Icon } from '@hugeicons/core-free-icons';
 import { AuthService } from '../../../services/auth.service';
 
@@ -14,21 +14,49 @@ export class ChangeEmailPage implements OnInit {
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly authService = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
   readonly Mail01Icon = Mail01Icon;
 
   email = '';
   submitted = false;
+  isSubmitting = false;
   errorMessage = '';
+  private initializedOnCurrentEnter = false;
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
+    this.initializedOnCurrentEnter = true;
+    void this.ensureUserAndPrefill();
+  }
+
+  ionViewWillEnter(): void {
+    if (this.initializedOnCurrentEnter) {
+      this.initializedOnCurrentEnter = false;
+      return;
+    }
+    void this.ensureUserAndPrefill();
+  }
+
+  private async ensureUserAndPrefill(): Promise<void> {
+    if (!this.authService.hasSessionToken()) {
       this.router.navigate(['/account']);
       return;
     }
+
+    let user = this.authService.getCurrentUser();
+    if (!user) {
+      const result = await this.authService.refreshProfile();
+      user = result.user ?? this.authService.getCurrentUser();
+      if (!user) {
+        this.router.navigate(['/account']);
+        this.cdr.markForCheck();
+        return;
+      }
+    }
+
     this.email = user.email;
+    this.cdr.markForCheck();
   }
 
   get isEmailValid(): boolean {
@@ -40,27 +68,37 @@ export class ChangeEmailPage implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    this.submitted = true;
-    this.errorMessage = '';
-
-    const result = this.authService.updateEmail(this.email);
-    if (!result.success) {
-      this.errorMessage = result.message;
+    if (this.isSubmitting) {
       return;
     }
 
-    try {
-      const toast = await this.toastCtrl.create({
-        message: 'Correo actualizado correctamente',
-        duration: 1800,
-        position: 'bottom',
-        color: 'dark',
-      });
-      await toast.present();
-    } catch {
-      // Ignore in test environments
-    }
+    this.submitted = true;
+    this.errorMessage = '';
+    this.isSubmitting = true;
 
-    this.router.navigate(['/account']);
+    try {
+      const result = await this.authService.updateEmail(this.email);
+      if (!result.success) {
+        this.errorMessage = result.message;
+        return;
+      }
+
+      try {
+        const toast = await this.toastCtrl.create({
+          message: 'Correo actualizado correctamente',
+          duration: 1800,
+          position: 'bottom',
+          color: 'dark',
+        });
+        await toast.present();
+      } catch {
+        // Ignore in test environments
+      }
+
+      this.router.navigate(['/account']);
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.markForCheck();
+    }
   }
 }

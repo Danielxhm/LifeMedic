@@ -148,17 +148,29 @@
           color="currentColor"
           aria-hidden="true"
         ></hugeicons-icon>
-        <h3 class="catalog-empty__title">No se encontraron medicamentos</h3>
-        <p class="catalog-empty__text">
-          No hay productos que coincidan con "{{ searchQuery }}". Intenta con otro término o limpia los filtros.
-        </p>
-        <button
-          class="catalog-empty__reset"
-          type="button"
-          (click)="clearSearch(); selectCategory('all')"
-        >
-          Ver todos los medicamentos
-        </button>
+        @if (catalogError) {
+          <h3 class="catalog-empty__title">No se pudo cargar el catálogo</h3>
+          <p class="catalog-empty__text">{{ catalogError }}</p>
+          <button
+            class="catalog-empty__reset"
+            type="button"
+            (click)="retryCatalogLoad()"
+          >
+            Reintentar
+          </button>
+        } @else {
+          <h3 class="catalog-empty__title">No se encontraron medicamentos</h3>
+          <p class="catalog-empty__text">
+            No hay productos que coincidan con "{{ searchQuery }}". Intenta con otro término o limpia los filtros.
+          </p>
+          <button
+            class="catalog-empty__reset"
+            type="button"
+            (click)="clearSearch(); selectCategory('all')"
+          >
+            Ver todos los medicamentos
+          </button>
+        }
       </div>
     }
   </div>

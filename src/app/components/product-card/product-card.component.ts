@@ -12,6 +12,7 @@ import { FavouriteIcon, Add01Icon } from '@hugeicons/core-free-icons';
 
 export interface Product {
   id: number;
+  codigo?: string;
   catalogType?: 'medicine' | 'product';
   brand: string;
   laboratory?: string;

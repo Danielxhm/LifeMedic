@@ -59,7 +59,7 @@ export class RegisterPage implements OnInit {
       this.firstName.trim().length > 0 &&
       this.lastName.trim().length > 0 &&
       this.isEmailValid &&
-      this.password.length >= 6
+      this.password.length >= 8
     );
   }
 
@@ -80,7 +80,7 @@ export class RegisterPage implements OnInit {
 
     if (!this.isFormValid) {
       this.errorMessage =
-        'Por favor completa todos los campos correctamente (la contraseña debe tener al menos 6 caracteres).';
+        'Por favor completa todos los campos correctamente (la contraseña debe tener al menos 8 caracteres).';
       return;
     }
 

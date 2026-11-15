@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-home',
@@ -6,4 +7,8 @@ import { Component } from '@angular/core';
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage {}
+export class HomePage {
+  private readonly cartService = inject(CartService);
+
+  readonly cartCount$ = this.cartService.cartCount$;
+}

@@ -108,8 +108,8 @@
 
       <div class="auth-spacer"></div>
 
-      <button type="submit" class="auth-submit-btn">
-        Finalizar
+      <button type="submit" class="auth-submit-btn" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Creando cuenta...' : 'Finalizar' }}
       </button>
     </form>
   </div>

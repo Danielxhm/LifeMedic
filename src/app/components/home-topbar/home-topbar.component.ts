@@ -1,4 +1,13 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  DestroyRef,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { HugeiconsIconComponent } from '@hugeicons/angular';
 import { ShoppingBag01Icon } from '@hugeicons/core-free-icons';
@@ -14,16 +23,21 @@ import { CartService } from '../../services/cart.service';
 })
 export class HomeTopbarComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly cartService = inject(CartService, { optional: true });
 
-  @Input() cartCount = 4;
+  @Input() cartCount = 0;
   readonly ShoppingBag01Icon = ShoppingBag01Icon;
 
   ngOnInit(): void {
     if (this.cartService) {
-      this.cartService.cartCount$.subscribe((count) => {
-        this.cartCount = count;
-      });
+      this.cartService.cartCount$
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((count) => {
+          this.cartCount = count;
+          this.cdr.markForCheck();
+        });
     }
   }
 

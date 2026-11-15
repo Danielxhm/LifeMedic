@@ -1,6 +1,7 @@
 <ion-header class="ion-no-border detail-header">
   <ion-toolbar class="detail-toolbar">
     <button
+      slot="start"
       class="nav-btn nav-btn--back"
       type="button"
       aria-label="Volver atrás"
@@ -136,16 +137,25 @@
 
         <!-- Delivery & Availability Badges -->
         <ul class="features-list">
-          <li class="feature-item feature-item--available">
+          <li
+            class="feature-item"
+            [class.feature-item--available]="product.inStock"
+          >
             <hugeicons-icon
-              class="feature-icon feature-icon--green"
+              class="feature-icon"
+              [class.feature-icon--green]="product.inStock"
               [icon]="PackageIcon"
               [size]="19"
               [strokeWidth]="1.8"
-              color="#16a34a"
+              [color]="product.inStock ? '#16a34a' : '#dc2626'"
               aria-hidden="true"
             ></hugeicons-icon>
-            <span class="feature-text feature-text--green">Disponible</span>
+            <span
+              class="feature-text"
+              [class.feature-text--green]="product.inStock"
+            >
+              {{ product.inStock ? 'Disponible' : 'Agotado' }}
+            </span>
           </li>
 
           <li class="feature-item">
@@ -205,9 +215,10 @@
   <button
     class="action-cart-btn"
     type="button"
-    aria-label="Añadir producto al carrito"
+    [disabled]="product && !product.inStock"
+    [attr.aria-label]="product && !product.inStock ? 'Producto agotado' : 'Añadir producto al carrito'"
     (click)="addToCart()"
   >
-    Añadir al carrito
+    {{ product && !product.inStock ? 'Agotado' : 'Añadir al carrito' }}
   </button>
 </footer>

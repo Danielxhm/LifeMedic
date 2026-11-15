@@ -171,8 +171,14 @@
           </div>
 
           <div class="summary-row">
-            <span class="summary-row__label">Impuestos (10.4%)</span>
-            <span class="summary-row__val">{{ formatPrice(activeSummary.tax) }} USD</span>
+            <span class="summary-row__label">Impuestos</span>
+            <span class="summary-row__val summary-row__val--free">
+              @if (activeSummary.tax > 0) {
+                {{ formatPrice(activeSummary.tax) }} USD
+              } @else {
+                Incluidos
+              }
+            </span>
           </div>
 
           <div class="summary-row">

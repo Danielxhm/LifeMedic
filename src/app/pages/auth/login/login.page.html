@@ -106,8 +106,8 @@
 
       <div class="auth-spacer"></div>
 
-      <button type="submit" class="auth-submit-btn">
-        Iniciar sesión
+      <button type="submit" class="auth-submit-btn" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }}
       </button>
     </form>
   </div>

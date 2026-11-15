@@ -1,7 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular/lazy';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular';
 import { HugeiconsIconComponent } from '@hugeicons/angular';
 
 import { AccountPage } from './account.page';
@@ -14,7 +14,10 @@ import { EditProfilePage } from './edit-profile/edit-profile.page';
   imports: [
     CommonModule,
     FormsModule,
-    IonicModule,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
     AccountPageRoutingModule,
     HugeiconsIconComponent,
   ],

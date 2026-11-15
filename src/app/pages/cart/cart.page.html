@@ -118,8 +118,8 @@
                   <button
                     type="button"
                     class="stepper__btn stepper__btn--plus"
-                    [disabled]="item.quantity >= (item.product.stock || 10)"
-                    [attr.aria-label]="'Aumentar cantidad. Stock máximo: ' + (item.product.stock || 10)"
+                    [disabled]="item.quantity >= (item.product.stock ?? 10)"
+                    [attr.aria-label]="'Aumentar cantidad. Stock máximo: ' + (item.product.stock ?? 10)"
                     (click)="onIncrement(item)"
                   >
                     <hugeicons-icon
@@ -134,7 +134,7 @@
               </div>
 
               <!-- Stock warning pill if stock limit reached -->
-              @if (item.quantity >= (item.product.stock || 10)) {
+              @if (item.quantity >= (item.product.stock ?? 10)) {
                 <div class="stock-badge" role="status">
                   <hugeicons-icon
                     [icon]="AlertCircleIcon"
@@ -143,7 +143,13 @@
                     color="#d97706"
                     aria-hidden="true"
                   ></hugeicons-icon>
-                  <span>Stock máximo disponible alcanzado</span>
+                  <span>
+                    {{
+                      (item.product.stock ?? 10) <= 0
+                        ? 'Producto sin stock disponible'
+                        : 'Stock máximo disponible alcanzado'
+                    }}
+                  </span>
                 </div>
               }
             </div>
@@ -163,11 +169,13 @@
         </div>
 
         <div class="order-summary__row">
-          <span class="order-summary__label">
-            Impuestos aplicables (10.4%)
-          </span>
-          <span class="order-summary__value">
-            {{ formatPrice((items.length > 0 ? summary : previousSummary).tax) }} USD
+          <span class="order-summary__label">Impuestos</span>
+          <span class="order-summary__value order-summary__value--free">
+            @if ((items.length > 0 ? summary : previousSummary).tax > 0) {
+              {{ formatPrice((items.length > 0 ? summary : previousSummary).tax) }} USD
+            } @else {
+              Incluidos
+            }
           </span>
         </div>
 
@@ -282,10 +290,12 @@
           <span class="order-modal__card-label">Subtotal</span>
           <span class="order-modal__card-val">{{ formatPrice(order.subtotal) }} USD</span>
         </div>
-        <div class="order-modal__row">
-          <span class="order-modal__card-label">Impuestos (10.4%)</span>
-          <span class="order-modal__card-val">{{ formatPrice(order.tax) }} USD</span>
-        </div>
+        @if (order.tax > 0) {
+          <div class="order-modal__row">
+            <span class="order-modal__card-label">Impuestos</span>
+            <span class="order-modal__card-val">{{ formatPrice(order.tax) }} USD</span>
+          </div>
+        }
         <div class="order-modal__row order-modal__row--total">
           <span class="order-modal__card-label">Total pagado</span>
           <span class="order-modal__card-val">{{ formatPrice(order.total) }} USD</span>

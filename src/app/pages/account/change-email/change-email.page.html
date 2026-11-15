@@ -61,8 +61,8 @@
 
       <div class="subpage-spacer"></div>
 
-      <button type="submit" class="subpage-submit-btn">
-        Actualizar
+      <button type="submit" class="subpage-submit-btn" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Actualizando...' : 'Actualizar' }}
       </button>
     </form>
   </div>

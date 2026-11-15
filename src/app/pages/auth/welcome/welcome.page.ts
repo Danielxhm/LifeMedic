@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController, NavController } from '@ionic/angular/lazy';
+import { AlertController, NavController } from '@ionic/angular';
 import { ArrowLeft02Icon, Mail01Icon } from '@hugeicons/core-free-icons';
 
 @Component({

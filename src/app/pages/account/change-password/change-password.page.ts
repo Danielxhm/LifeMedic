@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import {
   ArrowLeft02Icon,
   SquareLock02Icon,
@@ -19,6 +19,7 @@ export class ChangePasswordPage implements OnInit {
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly authService = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
   readonly SquareLock02Icon = SquareLock02Icon;
@@ -30,11 +31,35 @@ export class ChangePasswordPage implements OnInit {
   showNewPassword = false;
   showConfirmPassword = false;
   submitted = false;
+  isSubmitting = false;
   errorMessage = '';
+  private initializedOnCurrentEnter = false;
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
+    this.initializedOnCurrentEnter = true;
+    void this.ensureAuthenticated();
+  }
+
+  ionViewWillEnter(): void {
+    if (this.initializedOnCurrentEnter) {
+      this.initializedOnCurrentEnter = false;
+      return;
+    }
+    void this.ensureAuthenticated();
+  }
+
+  private async ensureAuthenticated(): Promise<void> {
+    if (!this.authService.hasSessionToken()) {
       this.router.navigate(['/account']);
+      return;
+    }
+
+    if (!this.authService.isLoggedIn()) {
+      const result = await this.authService.refreshProfile();
+      if (!result.user && !this.authService.isLoggedIn()) {
+        this.router.navigate(['/account']);
+      }
+      this.cdr.markForCheck();
     }
   }
 
@@ -43,37 +68,52 @@ export class ChangePasswordPage implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
+    if (this.isSubmitting) {
+      return;
+    }
+
     this.submitted = true;
     this.errorMessage = '';
 
-    if (this.newPassword.length < 6) {
-      this.errorMessage = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    if (this.newPassword.length < 8) {
+      this.errorMessage = 'La nueva contraseña debe tener al menos 8 caracteres.';
+      this.cdr.markForCheck();
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
       this.errorMessage = 'Las contraseñas no coinciden.';
+      this.cdr.markForCheck();
       return;
     }
 
-    const result = this.authService.updatePassword(this.newPassword);
-    if (!result.success) {
-      this.errorMessage = result.message;
-      return;
-    }
-
+    this.isSubmitting = true;
     try {
-      const toast = await this.toastCtrl.create({
-        message: 'Contraseña actualizada correctamente',
-        duration: 1800,
-        position: 'bottom',
-        color: 'dark',
-      });
-      await toast.present();
-    } catch {
-      // Ignore in test environments
-    }
+      const result = await this.authService.updatePassword(
+        this.newPassword,
+        this.confirmPassword,
+      );
+      if (!result.success) {
+        this.errorMessage = result.message;
+        return;
+      }
 
-    this.router.navigate(['/account']);
+      try {
+        const toast = await this.toastCtrl.create({
+          message: 'Contraseña actualizada correctamente',
+          duration: 1800,
+          position: 'bottom',
+          color: 'dark',
+        });
+        await toast.present();
+      } catch {
+        // Ignore in test environments
+      }
+
+      this.router.navigate(['/account']);
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.markForCheck();
+    }
   }
 }

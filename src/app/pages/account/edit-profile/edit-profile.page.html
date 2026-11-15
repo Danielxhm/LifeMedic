@@ -129,8 +129,8 @@
 
       <div class="subpage-spacer"></div>
 
-      <button type="submit" class="subpage-submit-btn">
-        Guardar cambios
+      <button type="submit" class="subpage-submit-btn" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Guardando...' : 'Guardar cambios' }}
       </button>
     </form>
   </div>

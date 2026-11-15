@@ -16,6 +16,7 @@ interface CategoriesResponse {
 
 interface ApiMedicine {
   id: number;
+  codigo?: string;
   category_id: number;
   category?: { name: string } | null;
   catalog_type?: 'medicine' | 'product';
@@ -24,7 +25,9 @@ interface ApiMedicine {
   laboratory?: string | null;
   description?: string | null;
   price: string | number;
+  previous_price?: string | number | null;
   stock: number;
+  available?: boolean;
   image_url?: string | null;
   created_at?: string;
 }
@@ -94,12 +97,26 @@ export class CatalogApiService {
     medicine: ApiMedicine,
     typeFallback: 'medicine' | 'product' = 'medicine',
   ): Product {
+    const price = Number(medicine.price);
+    const previousPrice =
+      medicine.previous_price !== undefined && medicine.previous_price !== null
+        ? Number(medicine.previous_price)
+        : undefined;
+    const hasDiscount =
+      previousPrice !== undefined && !Number.isNaN(previousPrice) && previousPrice > price;
+    const discountPercent = hasDiscount
+      ? Math.round(((previousPrice - price) / previousPrice) * 100)
+      : undefined;
+
     return {
       id: medicine.id,
+      codigo: medicine.codigo || undefined,
       brand: medicine.brand || medicine.laboratory || 'LifeMedic',
       laboratory: medicine.laboratory || undefined,
       name: medicine.name,
-      price: Number(medicine.price),
+      price,
+      originalPrice: hasDiscount ? previousPrice : undefined,
+      discountPercent,
       currency: 'USD',
       image: this.getImageUrl(medicine.image_url),
       description: medicine.description || undefined,
@@ -107,7 +124,7 @@ export class CatalogApiService {
       categoryId: String(medicine.category_id),
       catalogType: medicine.catalog_type ?? typeFallback,
       stock: medicine.stock,
-      inStock: medicine.stock > 0,
+      inStock: medicine.available !== undefined ? Boolean(medicine.available) : medicine.stock > 0,
       isFavorite: false,
       createdAt: medicine.created_at,
     };

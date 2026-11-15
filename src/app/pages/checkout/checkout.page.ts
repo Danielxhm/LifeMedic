@@ -10,7 +10,7 @@ import {
   AlertController,
   NavController,
   ToastController,
-} from '@ionic/angular/lazy';
+} from '@ionic/angular';
 import {
   ArrowLeft02Icon,
   CheckmarkCircle02Icon,
@@ -48,7 +48,7 @@ export class CheckoutPage implements OnInit {
   summary: CartSummary = {
     subtotal: 0,
     tax: 0,
-    taxRate: 0.103846,
+    taxRate: 0,
     shipping: 0,
     total: 0,
     itemCount: 0,
@@ -66,6 +66,7 @@ export class CheckoutPage implements OnInit {
   readonly isSubmitting = signal(false);
   readonly confirmedOrder = signal<OrderPayload | null>(null);
   readonly isOrderModalOpen = signal(false);
+  private loadedMunicipality = '';
 
   ngOnInit(): void {
     this.cartService.items$.subscribe((items) => {
@@ -87,11 +88,11 @@ export class CheckoutPage implements OnInit {
       }
     });
 
-    this.ensureSessionAndPrefill();
+    void this.ensureSessionAndPrefill();
   }
 
   ionViewWillEnter(): void {
-    this.ensureSessionAndPrefill();
+    void this.ensureSessionAndPrefill();
   }
 
   formatPrice(amount: number | undefined): string {
@@ -124,6 +125,10 @@ export class CheckoutPage implements OnInit {
     this.submitted = true;
     if (this.isSubmitting()) return;
 
+    if (this.items.length === 0 && this.authService.hasSessionToken()) {
+      await this.cartService.refreshCart().catch(() => []);
+    }
+
     if (this.items.length === 0) {
       await this.showToast('Tu carrito está vacío.', 'warning');
       this.router.navigate(['/products']);
@@ -155,12 +160,40 @@ export class CheckoutPage implements OnInit {
     this.isSubmitting.set(true);
     this.cdr.markForCheck();
 
-    this.authService.updateDeliveryInfo({
+    const trimmedAddress = this.address.trim();
+    let streetToSave = trimmedAddress;
+    let municipalityToSave = '';
+
+    if (this.loadedMunicipality) {
+      const suffix = `, ${this.loadedMunicipality}`;
+      if (trimmedAddress.toLowerCase().endsWith(suffix.toLowerCase())) {
+        streetToSave = trimmedAddress.slice(0, -suffix.length).trim();
+        municipalityToSave = this.loadedMunicipality;
+      } else if (
+        trimmedAddress.toLowerCase().includes(this.loadedMunicipality.toLowerCase())
+      ) {
+        municipalityToSave = '';
+      }
+    }
+
+    const profileResult = await this.authService.updateDeliveryInfo({
       phone: this.phone.trim(),
-      street: this.address.trim(),
+      street: streetToSave,
+      municipality: municipalityToSave,
       city: this.city.trim(),
       postalCode: this.postalCode.trim(),
     });
+
+    if (!profileResult.success) {
+      this.isSubmitting.set(false);
+      this.cdr.detectChanges();
+      await this.showToast(
+        profileResult.message ||
+          'No se pudieron guardar tus datos de entrega.',
+        'danger',
+      );
+      return;
+    }
 
     try {
       const order = await this.cartService.submitOrder({
@@ -172,19 +205,22 @@ export class CheckoutPage implements OnInit {
           postalCode: this.postalCode.trim(),
         },
         paymentMethod: this.paymentMethod,
+        deliveryMethod: 'Domicilio',
+        shippingCost: 0,
       });
 
       this.confirmedOrder.set(order);
       this.isSubmitting.set(false);
       this.isOrderModalOpen.set(true);
       this.cdr.detectChanges();
-    } catch {
+    } catch (error) {
       this.isSubmitting.set(false);
       this.cdr.detectChanges();
-      await this.showToast(
-        'Error al procesar el pago. Intenta nuevamente.',
-        'danger',
-      );
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Error al procesar el pedido. Intenta nuevamente.';
+      await this.showToast(message, 'danger');
     }
   }
 
@@ -195,15 +231,31 @@ export class CheckoutPage implements OnInit {
     this.router.navigate(['/products']);
   }
 
-  private ensureSessionAndPrefill(): void {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
+  private async ensureSessionAndPrefill(): Promise<void> {
+    if (!this.authService.hasSessionToken()) {
       this.router.navigate(['/auth/welcome'], {
         queryParams: { returnUrl: '/checkout' },
       });
       return;
     }
+
+    let user = this.authService.getCurrentUser();
+    if (!user) {
+      const result = await this.authService.refreshProfile();
+      user = result.user ?? this.authService.getCurrentUser();
+      if (!user) {
+        this.router.navigate(['/auth/welcome'], {
+          queryParams: { returnUrl: '/checkout' },
+        });
+        return;
+      }
+    }
+
     this.prefillFromUser(user);
+
+    if (this.cartService.getItems().length === 0) {
+      await this.cartService.refreshCart().catch(() => []);
+    }
   }
 
   private prefillFromUser(user: UserProfile): void {
@@ -213,11 +265,15 @@ export class CheckoutPage implements OnInit {
     const municipality = user.address.municipality.trim();
     const city = user.address.city.trim();
 
+    this.loadedMunicipality =
+      municipality && municipality.toLowerCase() !== city.toLowerCase()
+        ? municipality
+        : '';
+
     this.address =
-      municipality &&
-      municipality.toLowerCase() !== city.toLowerCase() &&
-      !street.toLowerCase().includes(municipality.toLowerCase())
-        ? `${street}, ${municipality}`
+      this.loadedMunicipality &&
+      !street.toLowerCase().includes(this.loadedMunicipality.toLowerCase())
+        ? `${street}, ${this.loadedMunicipality}`
         : street;
     this.city = city;
     this.postalCode = user.address.postalCode.trim();

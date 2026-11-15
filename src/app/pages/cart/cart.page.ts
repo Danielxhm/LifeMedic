@@ -1,16 +1,18 @@
 import {
   Component,
+  DestroyRef,
   OnInit,
   inject,
   signal,
   ChangeDetectorRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
   NavController,
   ToastController,
   AlertController,
-} from '@ionic/angular/lazy';
+} from '@ionic/angular';
 import {
   ArrowLeft02Icon,
   Cancel01Icon,
@@ -41,6 +43,7 @@ export class CartPage implements OnInit {
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly authService = inject(AuthService);
   readonly cartService = inject(CartService);
 
@@ -58,7 +61,7 @@ export class CartPage implements OnInit {
   summary: CartSummary = {
     subtotal: 0,
     tax: 0,
-    taxRate: 0.103846,
+    taxRate: 0,
     shipping: 0,
     total: 0,
     itemCount: 0,
@@ -66,7 +69,7 @@ export class CartPage implements OnInit {
   previousSummary: CartSummary = {
     subtotal: 0,
     tax: 0,
-    taxRate: 0.103846,
+    taxRate: 0,
     shipping: 0,
     total: 0,
     itemCount: 0,
@@ -81,21 +84,34 @@ export class CartPage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cartService.items$.subscribe((items) => {
-      if (items.length > 0) {
-        this.previousItems = [...items];
-      }
-      this.items = items;
-      this.cdr.markForCheck();
-    });
+    this.cartService.items$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((items) => {
+        if (items.length > 0) {
+          this.previousItems = [...items];
+        }
+        this.items = items;
+        this.cdr.markForCheck();
+      });
 
-    this.cartService.summary$.subscribe((summary) => {
-      if (summary.itemCount > 0) {
-        this.previousSummary = { ...summary };
+    this.cartService.summary$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((summary) => {
+        if (summary.itemCount > 0) {
+          this.previousSummary = { ...summary };
+        }
+        this.summary = summary;
+        this.cdr.markForCheck();
+      });
+  }
+
+  ionViewWillEnter(): void {
+    if (this.authService.hasSessionToken()) {
+      void this.cartService.refreshCart().catch(() => undefined);
+      if (!this.authService.getCurrentUser()) {
+        void this.authService.refreshProfile().catch(() => undefined);
       }
-      this.summary = summary;
-      this.cdr.markForCheck();
-    });
+    }
   }
 
   goBack(): void {
@@ -110,39 +126,44 @@ export class CartPage implements OnInit {
     this.router.navigate(['/products']);
   }
 
-  onIncrement(item: CartItem): void {
+  async onIncrement(item: CartItem): Promise<void> {
     const nextQty = item.quantity + 1;
     const maxStock = item.product.stock ?? 10;
 
     if (nextQty > maxStock) {
-      this.showToast(
-        `Stock máximo alcanzado: solo quedan ${maxStock} unidades disponibles.`,
+      await this.showToast(
+        maxStock <= 0
+          ? 'Stock máximo alcanzado: este producto está agotado.'
+          : `Stock máximo alcanzado: solo quedan ${maxStock} unidades disponibles.`,
         'warning',
       );
       return;
     }
 
-    const result = this.cartService.updateQuantity(
+    const result = await this.cartService.updateQuantity(
       item.product.id,
       nextQty,
       item.selectedSize,
     );
     if (!result.success) {
-      this.showToast(result.message, 'warning');
+      await this.showToast(result.message, 'warning');
     }
     this.cdr.markForCheck();
   }
 
-  onDecrement(item: CartItem): void {
+  async onDecrement(item: CartItem): Promise<void> {
     if (item.quantity > 1) {
-      this.cartService.updateQuantity(
+      const result = await this.cartService.updateQuantity(
         item.product.id,
         item.quantity - 1,
         item.selectedSize,
       );
+      if (!result.success) {
+        await this.showToast(result.message, 'warning');
+      }
       this.cdr.markForCheck();
     } else {
-      this.confirmRemoveItem(item);
+      await this.confirmRemoveItem(item);
     }
   }
 
@@ -159,7 +180,7 @@ export class CartPage implements OnInit {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            this.removeItem(item);
+            void this.removeItem(item);
           },
         },
       ],
@@ -167,9 +188,17 @@ export class CartPage implements OnInit {
     await alert.present();
   }
 
-  removeItem(item: CartItem): void {
-    this.cartService.removeItem(item.product.id, item.selectedSize);
-    this.showToast(`Se eliminó "${item.product.name}" del carrito`, 'dark');
+  async removeItem(item: CartItem): Promise<void> {
+    const result = await this.cartService.removeItem(
+      item.product.id,
+      item.selectedSize,
+    );
+    await this.showToast(
+      result.success
+        ? `Se eliminó "${item.product.name}" del carrito`
+        : result.message,
+      result.success ? 'dark' : 'warning',
+    );
     this.cdr.markForCheck();
   }
 
@@ -182,10 +211,19 @@ export class CartPage implements OnInit {
         {
           text: 'Vaciar',
           role: 'destructive',
-          handler: () => {
-            this.cartService.clearCart();
-            this.showToast('Carrito vaciado', 'dark');
-            this.cdr.markForCheck();
+          handler: async () => {
+            try {
+              await this.cartService.clearCart();
+              await this.showToast('Carrito vaciado', 'dark');
+            } catch (error) {
+              const message =
+                error instanceof Error && error.message
+                  ? error.message
+                  : 'No se pudo vaciar el carrito.';
+              await this.showToast(message, 'danger');
+            } finally {
+              this.cdr.markForCheck();
+            }
           },
         },
       ],
@@ -196,11 +234,36 @@ export class CartPage implements OnInit {
   async proceedToCheckout(): Promise<void> {
     if (this.items.length === 0 || this.isSubmitting()) return;
 
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.hasSessionToken()) {
       await this.router.navigate(['/auth/welcome'], {
         queryParams: { returnUrl: '/checkout' },
       });
       return;
+    }
+
+    if (!this.authService.isLoggedIn()) {
+      this.isSubmitting.set(true);
+      this.cdr.markForCheck();
+      try {
+        const profileResult = await this.authService.refreshProfile();
+        if (!this.authService.isLoggedIn()) {
+          if (!this.authService.hasSessionToken()) {
+            await this.router.navigate(['/auth/welcome'], {
+              queryParams: { returnUrl: '/checkout' },
+            });
+          } else {
+            await this.showToast(
+              profileResult.message ||
+                'No se pudo verificar tu sesión en el servidor.',
+              'danger',
+            );
+          }
+          return;
+        }
+      } finally {
+        this.isSubmitting.set(false);
+        this.cdr.markForCheck();
+      }
     }
 
     await this.router.navigate(['/checkout']);
@@ -218,12 +281,16 @@ export class CartPage implements OnInit {
     message: string,
     color: 'dark' | 'warning' | 'danger' | 'success' = 'dark',
   ): Promise<void> {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 1800,
-      position: 'bottom',
-      color,
-    });
-    await toast.present();
+    try {
+      const toast = await this.toastCtrl.create({
+        message,
+        duration: 1800,
+        position: 'bottom',
+        color,
+      });
+      await toast.present();
+    } catch {
+      // Ignore in test environments
+    }
   }
 }

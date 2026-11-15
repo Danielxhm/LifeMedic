@@ -75,7 +75,7 @@
   max-width: 460px;
   width: 100%;
   margin: 0 auto;
-  padding: 24px 24px calc(30px + env(safe-area-inset-bottom, 0px));
+  padding: 24px 24px calc(clamp(28px, 4.8vh, 42px) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -83,11 +83,11 @@
 }
 
 .welcome-headline {
-  margin: 0 0 28px;
+  margin: 0 0 clamp(28px, 5vh, 44px);
   font-family: var(--font-display, 'Google Sans', sans-serif);
-  font-size: 32px;
+  font-size: clamp(2.35rem, 11.5vw, 3rem);
   font-weight: 700;
-  line-height: 1.14;
+  line-height: 1.18;
   letter-spacing: -0.025em;
   color: #ffffff;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
@@ -98,7 +98,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: clamp(18px, 2.8vh, 24px);
 }
 
 .welcome-btn {

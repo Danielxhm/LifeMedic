@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular/lazy';
+import { IonContent } from '@ionic/angular';
 import { HugeiconsIconComponent } from '@hugeicons/angular';
 
 import { ProductsPage } from './products.page';
@@ -14,7 +14,7 @@ import { ProductCardComponent } from '../../components/product-card/product-card
   imports: [
     CommonModule,
     FormsModule,
-    IonicModule,
+    IonContent,
     ProductsPageRoutingModule,
     HomeTopbarComponent,
     BottomNavComponent,

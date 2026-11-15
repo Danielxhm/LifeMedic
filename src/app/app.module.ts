@@ -1,26 +1,34 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular/lazy';
+import {
+  IonApp,
+  IonRouterOutlet,
+  IonicRouteStrategy,
+  provideIonicAngular,
+} from '@ionic/angular';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { BottomNavComponent } from './components/bottom-nav/bottom-nav.component';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
-    HttpClientModule,
-    IonicModule.forRoot({
-      animated: false,
-    }),
+    IonApp,
+    IonRouterOutlet,
     AppRoutingModule,
     BottomNavComponent,
   ],
   providers: [
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideIonicAngular({
+      animated: false,
+    }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],
   bootstrap: [AppComponent],

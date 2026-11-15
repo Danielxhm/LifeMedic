@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular/lazy';
+import { provideIonicAngular } from '@ionic/angular';
 
 import { PromoCarouselComponent } from './promo-carousel.component';
 
@@ -10,7 +10,8 @@ describe('PromoCarouselComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IonicModule.forRoot(), PromoCarouselComponent, RouterModule.forRoot([])],
+      imports: [PromoCarouselComponent, RouterModule.forRoot([])],
+      providers: [provideIonicAngular()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PromoCarouselComponent);

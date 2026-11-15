@@ -1,7 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular/lazy';
+import { IonContent } from '@ionic/angular';
 import { HugeiconsIconComponent } from '@hugeicons/angular';
 
 import { AuthPageRoutingModule } from './auth-routing.module';
@@ -14,7 +14,7 @@ import { AddressPage } from './address/address.page';
   imports: [
     CommonModule,
     FormsModule,
-    IonicModule,
+    IonContent,
     AuthPageRoutingModule,
     HugeiconsIconComponent,
   ],

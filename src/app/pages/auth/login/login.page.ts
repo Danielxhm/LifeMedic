@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import {
   ArrowLeft02Icon,
   Mail01Icon,
@@ -21,6 +21,7 @@ export class LoginPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
   readonly Mail01Icon = Mail01Icon;
@@ -32,6 +33,7 @@ export class LoginPage implements OnInit {
   password = '';
   showPassword = false;
   submitted = false;
+  isSubmitting = false;
   errorMessage = '';
   returnUrl = '/home';
 
@@ -61,27 +63,37 @@ export class LoginPage implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    this.submitted = true;
-    this.errorMessage = '';
-
-    const result = this.authService.login(this.email, this.password);
-    if (!result.success) {
-      this.errorMessage = result.message;
+    if (this.isSubmitting) {
       return;
     }
 
-    try {
-      const toast = await this.toastCtrl.create({
-        message: result.message,
-        duration: 1800,
-        position: 'bottom',
-        color: 'dark',
-      });
-      await toast.present();
-    } catch {
-      // Ignore toast failure in tests
-    }
+    this.submitted = true;
+    this.errorMessage = '';
+    this.isSubmitting = true;
 
-    this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
+    try {
+      const result = await this.authService.login(this.email, this.password);
+      if (!result.success) {
+        this.errorMessage = result.message;
+        return;
+      }
+
+      try {
+        const toast = await this.toastCtrl.create({
+          message: result.message,
+          duration: 1800,
+          position: 'bottom',
+          color: 'dark',
+        });
+        await toast.present();
+      } catch {
+        // Ignore toast failure in tests
+      }
+
+      this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.markForCheck();
+    }
   }
 }

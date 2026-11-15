@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { AuthService } from '../../../services/auth.service';
 
@@ -14,6 +14,7 @@ export class EditProfilePage implements OnInit {
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   private readonly authService = inject(AuthService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
 
@@ -23,13 +24,38 @@ export class EditProfilePage implements OnInit {
   municipality = '';
   city = '';
   submitted = false;
+  isSubmitting = false;
   errorMessage = '';
+  private initializedOnCurrentEnter = false;
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
+    this.initializedOnCurrentEnter = true;
+    void this.ensureUserAndPrefill();
+  }
+
+  ionViewWillEnter(): void {
+    if (this.initializedOnCurrentEnter) {
+      this.initializedOnCurrentEnter = false;
+      return;
+    }
+    void this.ensureUserAndPrefill();
+  }
+
+  private async ensureUserAndPrefill(): Promise<void> {
+    if (!this.authService.hasSessionToken()) {
       this.router.navigate(['/account']);
       return;
+    }
+
+    let user = this.authService.getCurrentUser();
+    if (!user) {
+      const result = await this.authService.refreshProfile();
+      user = result.user ?? this.authService.getCurrentUser();
+      if (!user) {
+        this.router.navigate(['/account']);
+        this.cdr.markForCheck();
+        return;
+      }
     }
 
     this.firstName = user.firstName;
@@ -37,6 +63,7 @@ export class EditProfilePage implements OnInit {
     this.street = user.address.street;
     this.municipality = user.address.municipality;
     this.city = user.address.city;
+    this.cdr.markForCheck();
   }
 
   goBack(): void {
@@ -44,34 +71,44 @@ export class EditProfilePage implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    this.submitted = true;
-    this.errorMessage = '';
-
-    const result = this.authService.updateProfileData({
-      firstName: this.firstName,
-      lastName: this.lastName,
-      street: this.street,
-      municipality: this.municipality,
-      city: this.city,
-    });
-
-    if (!result.success) {
-      this.errorMessage = result.message;
+    if (this.isSubmitting) {
       return;
     }
 
-    try {
-      const toast = await this.toastCtrl.create({
-        message: 'Datos personales guardados con éxito',
-        duration: 1800,
-        position: 'bottom',
-        color: 'dark',
-      });
-      await toast.present();
-    } catch {
-      // Ignore in test environments
-    }
+    this.submitted = true;
+    this.errorMessage = '';
+    this.isSubmitting = true;
 
-    this.router.navigate(['/account']);
+    try {
+      const result = await this.authService.updateProfileData({
+        firstName: this.firstName,
+        lastName: this.lastName,
+        street: this.street,
+        municipality: this.municipality,
+        city: this.city,
+      });
+
+      if (!result.success) {
+        this.errorMessage = result.message;
+        return;
+      }
+
+      try {
+        const toast = await this.toastCtrl.create({
+          message: 'Datos personales guardados con éxito',
+          duration: 1800,
+          position: 'bottom',
+          color: 'dark',
+        });
+        await toast.present();
+      } catch {
+        // Ignore in test environments
+      }
+
+      this.router.navigate(['/account']);
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.markForCheck();
+    }
   }
 }

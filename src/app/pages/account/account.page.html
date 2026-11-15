@@ -102,6 +102,26 @@
             aria-hidden="true"
           ></hugeicons-icon>
         </button>
+
+        <button type="button" class="menu-row" (click)="openOrdersModal()">
+          <span class="menu-row__left">
+            <hugeicons-icon
+              [icon]="PackageIcon"
+              [size]="20"
+              [strokeWidth]="1.8"
+              color="currentColor"
+              aria-hidden="true"
+            ></hugeicons-icon>
+            <span class="menu-row__label">Mis pedidos</span>
+          </span>
+          <hugeicons-icon
+            [icon]="ArrowRight01Icon"
+            [size]="16"
+            [strokeWidth]="2"
+            color="#94a3b8"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
       </section>
 
       <!-- Menu Group 2: Static buttons without navigation -->
@@ -206,3 +226,181 @@
     }
   </div>
 </ion-content>
+
+@if (isOrdersModalOpen) {
+  <div class="orders-modal-backdrop" (click)="closeOrdersModal()">
+    <div
+      class="orders-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="orders-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="orders-modal__header">
+        <div class="orders-modal__header-left">
+          @if (isOrderDetailView) {
+            <button
+              type="button"
+              class="orders-modal__back"
+              aria-label="Volver a mis pedidos"
+              (click)="backToOrdersList()"
+            >
+              <hugeicons-icon
+                [icon]="ArrowLeft02Icon"
+                [size]="18"
+                [strokeWidth]="2"
+                color="currentColor"
+                aria-hidden="true"
+              ></hugeicons-icon>
+            </button>
+          }
+          <h2 id="orders-modal-title" class="orders-modal__title">
+            {{ isOrderDetailView ? (selectedOrder?.order_number || 'Detalle del pedido') : 'Mis pedidos' }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="orders-modal__close"
+          aria-label="Cerrar historial de pedidos"
+          (click)="closeOrdersModal()"
+        >
+          <hugeicons-icon
+            [icon]="Cancel01Icon"
+            [size]="18"
+            [strokeWidth]="2"
+            color="currentColor"
+            aria-hidden="true"
+          ></hugeicons-icon>
+        </button>
+      </div>
+
+      @if (isOrderDetailView) {
+        @if (isLoadingOrderDetail) {
+          <p class="orders-modal__state">Cargando detalle del pedido...</p>
+        } @else if (orderDetailError) {
+          <p class="orders-modal__state orders-modal__state--error">{{ orderDetailError }}</p>
+          <button
+            type="button"
+            class="order-detail__back-btn"
+            (click)="backToOrdersList()"
+          >
+            Volver a mis pedidos
+          </button>
+        } @else if (selectedOrder; as detail) {
+          <div class="order-detail">
+            <div class="order-detail__top">
+              <span class="order-history-card__status">{{ detail.status_label }}</span>
+              @if (formatOrderDate(detail.placed_at); as placedDate) {
+                <span class="order-detail__date">{{ placedDate }}</span>
+              }
+            </div>
+
+            <section class="order-detail__section" aria-label="Información de entrega">
+              <div class="order-detail__info-row">
+                <span class="order-detail__label">Método de entrega</span>
+                <span class="order-detail__value">
+                  {{ detail.delivery_method_label || detail.delivery_method }}
+                </span>
+              </div>
+              <div class="order-detail__info-row">
+                <span class="order-detail__label">Dirección</span>
+                <span class="order-detail__value">
+                  {{ detail.delivery_address || 'Sin dirección' }}
+                </span>
+              </div>
+              @if (detail.phone) {
+                <div class="order-detail__info-row">
+                  <span class="order-detail__label">Teléfono</span>
+                  <span class="order-detail__value">{{ detail.phone }}</span>
+                </div>
+              }
+              @if (detail.admin_note) {
+                <div class="order-detail__info-row">
+                  <span class="order-detail__label">Nota</span>
+                  <span class="order-detail__value">{{ detail.admin_note }}</span>
+                </div>
+              }
+            </section>
+
+            <section class="order-detail__section" aria-label="Productos del pedido">
+              <h3 class="order-detail__heading">Productos ({{ detail.items_count }})</h3>
+              @if (detail.items.length === 0) {
+                <p class="order-detail__empty">Sin líneas de detalle disponibles.</p>
+              } @else {
+                <div class="order-detail__items">
+                  @for (item of detail.items; track item.id) {
+                    <div class="order-detail__item">
+                      <div class="order-detail__item-main">
+                        <span class="order-detail__item-name">{{ item.name }}</span>
+                        <span class="order-detail__item-meta">
+                          {{ item.quantity }} × {{ formatPrice(item.unit_price) }} USD
+                          @if (item.codigo) {
+                            · {{ item.codigo }}
+                          }
+                        </span>
+                      </div>
+                      <span class="order-detail__item-total">
+                        {{ formatPrice(item.line_total) }} USD
+                      </span>
+                    </div>
+                  }
+                </div>
+              }
+            </section>
+
+            <section class="order-detail__totals" aria-label="Resumen de montos">
+              <div class="order-detail__total-row">
+                <span>Subtotal</span>
+                <span>{{ formatPrice(detail.subtotal) }} USD</span>
+              </div>
+              <div class="order-detail__total-row">
+                <span>Envío</span>
+                <span class="order-detail__shipping">
+                  {{
+                    detail.free_shipping || detail.shipping_cost === 0
+                      ? 'Gratis'
+                      : formatPrice(detail.shipping_cost) + ' USD'
+                  }}
+                </span>
+              </div>
+              <div class="order-detail__total-row order-detail__total-row--grand">
+                <span>Total</span>
+                <span>{{ formatPrice(detail.total) }} USD</span>
+              </div>
+            </section>
+          </div>
+        }
+      } @else {
+        @if (isLoadingOrders) {
+          <p class="orders-modal__state">Cargando tus pedidos...</p>
+        } @else if (ordersError) {
+          <p class="orders-modal__state orders-modal__state--error">{{ ordersError }}</p>
+        } @else if (orders.length === 0) {
+          <p class="orders-modal__state">Aún no has realizado pedidos.</p>
+        } @else {
+          <div class="orders-modal__list">
+            @for (order of orders; track order.id) {
+              <button
+                type="button"
+                class="order-history-card"
+                (click)="openOrderDetail(order)"
+              >
+                <div class="order-history-card__top">
+                  <span class="order-history-card__number">{{ order.order_number }}</span>
+                  <span class="order-history-card__status">{{ order.status_label }}</span>
+                </div>
+                <p class="order-history-card__meta">
+                  {{ order.items_count }} {{ order.items_count === 1 ? 'producto' : 'productos' }} · {{ order.delivery_method_label }}
+                </p>
+                <div class="order-history-card__bottom">
+                  <span class="order-history-card__address">{{ order.delivery_address || 'Sin dirección' }}</span>
+                  <span class="order-history-card__total">{{ formatPrice(order.total) }} USD</span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

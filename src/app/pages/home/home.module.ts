@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular/lazy';
+import { IonContent } from '@ionic/angular';
 
 import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
@@ -14,7 +14,7 @@ import { SearchBarComponent } from '../../components/search-bar/search-bar.compo
 @NgModule({
   imports: [
     CommonModule,
-    IonicModule,
+    IonContent,
     HomePageRoutingModule,
     PromoCarouselComponent,
     CategoryListComponent,

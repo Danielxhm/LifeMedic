@@ -1,11 +1,13 @@
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnInit,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import {
   Search01Icon,
   Cancel01Icon,
@@ -14,7 +16,8 @@ import {
 } from '@hugeicons/core-free-icons';
 import { Product } from '../../components/product-card/product-card.component';
 import { CatalogApiService } from '../../services/catalog-api.service';
-import { ProductsService } from '../../services/products.service';
+import { CartService } from '../../services/cart.service';
+import { extractApiErrorMessage } from '../../utils/api-error.util';
 
 export interface CategoryTab {
   id: string;
@@ -31,20 +34,23 @@ export class ProductsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly toastCtrl = inject(ToastController);
-  private readonly productsService = inject(ProductsService);
+  private readonly cartService = inject(CartService);
   private readonly catalogApi = inject(CatalogApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly Search01Icon = Search01Icon;
   readonly Cancel01Icon = Cancel01Icon;
   readonly SlidersHorizontalIcon = SlidersHorizontalIcon;
   readonly ChevronDownIcon = ChevronDownIcon;
 
-  cartCount = 4;
+  cartCount = this.cartService.getCartCount();
   searchQuery = '';
   selectedCategoryId = 'all';
   selectedSort = 'destacados';
   isSortModalOpen = false;
+  catalogError = '';
+  private skipNextEnterRefresh = false;
 
   categories: CategoryTab[] = [{ id: 'all', name: 'Todos' }];
   products: Product[] = [];
@@ -57,39 +63,92 @@ export class ProductsPage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.searchQuery =
-      this.route.snapshot.queryParamMap.get('search') ?? '';
+    this.skipNextEnterRefresh = true;
 
-    this.selectedCategoryId =
-      this.route.snapshot.queryParamMap.get('categoryId') ?? 'all';
+    this.cartService.cartCount$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((count) => {
+        this.cartCount = count;
+        this.cdr.markForCheck();
+      });
 
-    this.catalogApi.getCatalogProducts().subscribe({
-      next: (products) => {
-        console.log('Productos recibidos de la API:', products.length, products);
-        this.products = products;
-        this.cartCount = this.productsService.getCartCount();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error al cargar productos de la API:', error);
-      },
-    });
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        this.searchQuery = params.get('search') ?? '';
+        this.selectedCategoryId = params.get('categoryId') ?? 'all';
+        this.cdr.markForCheck();
+      });
 
-    this.catalogApi.getCategories().subscribe({
-      next: (categories) => {
-        this.categories = [
-          { id: 'all', name: 'Todos' },
-          ...categories.map((category) => ({
-            id: String(category.id),
-            name: category.name,
-          })),
-        ];
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error al cargar categorías:', error);
-      },
-    });
+    this.loadCatalog();
+    this.loadCategories();
+  }
+
+  ionViewWillEnter(): void {
+    this.isSortModalOpen = false;
+    this.cartCount = this.cartService.getCartCount();
+
+    if (this.skipNextEnterRefresh) {
+      this.skipNextEnterRefresh = false;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.loadCatalog();
+    if (this.categories.length <= 1) {
+      this.loadCategories();
+    }
+    this.cdr.markForCheck();
+  }
+
+  retryCatalogLoad(): void {
+    this.loadCatalog();
+    if (this.categories.length <= 1) {
+      this.loadCategories();
+    }
+  }
+
+  private loadCatalog(): void {
+    this.catalogApi
+      .getCatalogProducts()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (products) => {
+          this.products = products;
+          this.catalogError = '';
+          this.cartCount = this.cartService.getCartCount();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al cargar productos de la API:', error);
+          this.catalogError = extractApiErrorMessage(
+            error,
+            'No se pudieron cargar los productos.',
+          );
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private loadCategories(): void {
+    this.catalogApi
+      .getCategories()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (categories) => {
+          this.categories = [
+            { id: 'all', name: 'Todos' },
+            ...categories.map((category) => ({
+              id: String(category.id),
+              name: category.name,
+            })),
+          ];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al cargar categorías:', error);
+        },
+      });
   }
 
   get totalProductsCount(): number {
@@ -120,6 +179,8 @@ export class ProductsPage implements OnInit {
         (product) =>
           product.name.toLowerCase().includes(query) ||
           product.brand.toLowerCase().includes(query) ||
+          (product.laboratory?.toLowerCase().includes(query) ?? false) ||
+          (product.codigo?.toLowerCase().includes(query) ?? false) ||
           (product.category?.toLowerCase().includes(query) ?? false),
       );
     }
@@ -143,27 +204,33 @@ export class ProductsPage implements OnInit {
 
   selectCategory(categoryId: string): void {
     this.selectedCategoryId = categoryId;
+    this.cdr.markForCheck();
   }
 
   onSearchInput(event: Event): void {
     this.searchQuery = (event.target as HTMLInputElement).value;
+    this.cdr.markForCheck();
   }
 
   clearSearch(): void {
     this.searchQuery = '';
+    this.cdr.markForCheck();
   }
 
   toggleSortModal(): void {
     this.isSortModalOpen = !this.isSortModalOpen;
+    this.cdr.markForCheck();
   }
 
   selectSort(sortId: string): void {
     this.selectedSort = sortId;
     this.isSortModalOpen = false;
+    this.cdr.markForCheck();
   }
 
   async toggleFavorite(product: Product): Promise<void> {
     product.isFavorite = !product.isFavorite;
+    this.cdr.markForCheck();
 
     const message = product.isFavorite
       ? `Añadido a favoritos: ${product.name}`
@@ -180,23 +247,31 @@ export class ProductsPage implements OnInit {
   }
 
   async addToCart(product: Product): Promise<void> {
-    this.cartCount = this.productsService.addToCart(product.id);
+    const result = await this.cartService.addItem(product, 1);
+    this.cartCount = this.cartService.getCartCount();
+    this.cdr.markForCheck();
 
-    const toast = await this.toastCtrl.create({
-      message: `¡${product.name} añadido al carrito!`,
-      duration: 2000,
-      position: 'bottom',
-      color: 'dark',
-      buttons: [
-        {
-          text: 'Ver',
-          handler: () => {
-            this.router.navigate(['/cart']);
-          },
-        },
-      ],
-    });
+    try {
+      const toast = await this.toastCtrl.create({
+        message: result.message,
+        duration: 2000,
+        position: 'bottom',
+        color: result.success ? 'dark' : 'warning',
+        buttons: result.success
+          ? [
+              {
+                text: 'Ver',
+                handler: () => {
+                  this.router.navigate(['/cart']);
+                },
+              },
+            ]
+          : undefined,
+      });
 
-    await toast.present();
+      await toast.present();
+    } catch {
+      // Ignore toast failure in tests
+    }
   }
 }

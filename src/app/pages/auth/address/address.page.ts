@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastController } from '@ionic/angular/lazy';
+import { ToastController } from '@ionic/angular';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { AuthService } from '../../../services/auth.service';
 
@@ -15,6 +15,7 @@ export class AddressPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly ArrowLeft02Icon = ArrowLeft02Icon;
 
@@ -23,6 +24,7 @@ export class AddressPage implements OnInit {
   city = '';
   postalCode = '';
   submitted = false;
+  isSubmitting = false;
   errorMessage = '';
   returnUrl = '/home';
 
@@ -57,6 +59,10 @@ export class AddressPage implements OnInit {
   }
 
   async onFinish(): Promise<void> {
+    if (this.isSubmitting) {
+      return;
+    }
+
     this.submitted = true;
     this.errorMessage = '';
 
@@ -65,30 +71,36 @@ export class AddressPage implements OnInit {
       return;
     }
 
-    const result = this.authService.completeRegistration({
-      street: this.street.trim(),
-      municipality: this.municipality.trim(),
-      city: this.city.trim(),
-      postalCode: this.postalCode.trim(),
-    });
-
-    if (!result.success) {
-      this.errorMessage = result.message;
-      return;
-    }
-
+    this.isSubmitting = true;
     try {
-      const toast = await this.toastCtrl.create({
-        message: '¡Cuenta y dirección guardadas con éxito!',
-        duration: 2000,
-        position: 'bottom',
-        color: 'dark',
+      const result = await this.authService.completeRegistration({
+        street: this.street.trim(),
+        municipality: this.municipality.trim(),
+        city: this.city.trim(),
+        postalCode: this.postalCode.trim(),
       });
-      await toast.present();
-    } catch {
-      // Ignore toast presentation errors in test environments
-    }
 
-    this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
+      if (!result.success) {
+        this.errorMessage = result.message;
+        return;
+      }
+
+      try {
+        const toast = await this.toastCtrl.create({
+          message: '¡Cuenta y dirección guardadas con éxito!',
+          duration: 2000,
+          position: 'bottom',
+          color: 'dark',
+        });
+        await toast.present();
+      } catch {
+        // Ignore toast presentation errors in test environments
+      }
+
+      this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
+    } finally {
+      this.isSubmitting = false;
+      this.cdr.markForCheck();
+    }
   }
 }

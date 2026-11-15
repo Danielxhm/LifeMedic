@@ -5,7 +5,7 @@ import {
   AlertController,
   NavController,
   ToastController,
-} from '@ionic/angular/lazy';
+} from '@ionic/angular';
 
 import { AuthPageModule } from './auth.module';
 import { AuthService } from '../../services/auth.service';
